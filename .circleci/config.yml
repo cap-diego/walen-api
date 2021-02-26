@@ -25,8 +25,6 @@ jobs:
           command: |
               . venv/bin/activate
               python manage.py test
-          environment:
-              SECRET_KEY: '7shqww*5cd*5v*_m0d-o*t+iqe-x!cmub6x(ubn*o+)^(s4_ms'
       - store_artifacts:
           path: test_reports
           destination: tr1
