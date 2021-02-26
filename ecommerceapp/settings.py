@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'products'
 ]
 
 MIDDLEWARE = [
@@ -83,15 +85,9 @@ WSGI_APPLICATION = 'ecommerceapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 # Postgress connection https://devcenter.heroku.com/articles/heroku-postgresql
-DATABASES = {
-    'sqlite3': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+DATABASES = {}
 POSTGRES_CONN_MAX_AGE = os.environ.get('POSTGRES_CONN_MAX_AGE', 20)
 DATABASES['default'] = dj_database_url.config(conn_max_age=POSTGRES_CONN_MAX_AGE, ssl_require=True)
-
 
 
 # Password validation
@@ -112,6 +108,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Django DRF config https://www.django-rest-framework.org/#installation
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+    ],
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
