@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 import dj_database_url
 import django_heroku
 
@@ -86,7 +87,7 @@ WSGI_APPLICATION = 'ecommerceapp.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 # Postgress connection https://devcenter.heroku.com/articles/heroku-postgresql
 DATABASES = {}
-if 'test' in os.sys.argv:
+if 'test' in sys.argv:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'test_database'
