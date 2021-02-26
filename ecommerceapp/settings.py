@@ -86,8 +86,14 @@ WSGI_APPLICATION = 'ecommerceapp.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 # Postgress connection https://devcenter.heroku.com/articles/heroku-postgresql
 DATABASES = {}
-POSTGRES_CONN_MAX_AGE = os.environ.get('POSTGRES_CONN_MAX_AGE', 20)
-DATABASES['default'] = dj_database_url.config(conn_max_age=POSTGRES_CONN_MAX_AGE, ssl_require=True)
+if 'test' in os.sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'test_database'
+    }
+else:
+    POSTGRES_CONN_MAX_AGE = os.environ.get('POSTGRES_CONN_MAX_AGE', 20)
+    DATABASES['default'] = dj_database_url.config(conn_max_age=POSTGRES_CONN_MAX_AGE, ssl_require=True)
 
 
 # Password validation
