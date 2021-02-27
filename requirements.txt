@@ -1,6 +1,5 @@
 Django
 gunicorn
-whitenoise
 psycopg2-binary
 dj-database-url
 djangorestframework
