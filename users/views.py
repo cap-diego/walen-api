@@ -6,7 +6,6 @@ from django.views.decorators.http import require_http_methods
 # From drf
 from rest_framework import viewsets
 from rest_framework.permissions import IsAdminUser
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
@@ -21,17 +20,10 @@ from users.auth import magiclink
 User = get_user_model()
 APPLICATION_JSON = 'application/json'
 
-class NormalPagination(PageNumberPagination):
-    page_size = 30
-    page_size_query_param = 'page_size'
-    max_page_size = 100
-
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]       
-    pagination_class = NormalPagination    
 
     @action(detail=False, methods=['POST'], permission_classes=[])
     def new(self, request):
