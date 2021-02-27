@@ -1,6 +1,5 @@
 # From django
 from django.test import TestCase
-from django.test import Client
 
 # From w
 from carts.models import Cart
