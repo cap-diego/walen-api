@@ -6,3 +6,4 @@ dj-database-url
 djangorestframework
 django-dynamic-fixture
 django-heroku
+magic-admin

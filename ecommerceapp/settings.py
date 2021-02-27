@@ -34,10 +34,14 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
+# MAGIC LINK PRIVATE SECRET KEY
+MAGIC_LINK_SECRET_KEY = os.environ.get('MAGIC_LINK_SECRET_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG')
 
 ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOST')]
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -48,8 +52,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'users',
     'products'
 ]
+
+AUTH_USER_MODEL = 'users.User'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -80,6 +88,10 @@ TEMPLATES = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
+
 WSGI_APPLICATION = 'ecommerceapp.wsgi.application'
 
 TESTING = 'test' in sys.argv
@@ -93,9 +105,9 @@ if TESTING:
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'test_database'
     }
-# else:
-#     POSTGRES_CONN_MAX_AGE = os.environ.get('POSTGRES_CONN_MAX_AGE', 20)
-#     DATABASES['default'] = dj_database_url.config(conn_max_age=POSTGRES_CONN_MAX_AGE, ssl_require=True)
+else:
+    POSTGRES_CONN_MAX_AGE = os.environ.get('POSTGRES_CONN_MAX_AGE', 20)
+    DATABASES['default'] = dj_database_url.config(conn_max_age=POSTGRES_CONN_MAX_AGE, ssl_require=True)
 
 
 # Password validation
