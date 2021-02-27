@@ -22,6 +22,9 @@ class Cart(models.Model):
         related_name='carts',
         through='CartProduct')
 
+    class Meta:
+        ordering = ['updated_at']
+    
     @property 
     def is_locked(self):
         return self.locked
@@ -44,32 +47,32 @@ class Cart(models.Model):
         total = sum(mount_by_product)
         return total
 
-    def get_cartprod(self, prod):
+    def get_cartprod(self, prod_id):
         return CartProduct.objects.filter(
-                        cart=self, product=prod)
+                        cart=self, product_id=prod_id)
 
-    def create_cartprod(self, prod, qt):
+    def create_cartprod(self, prod_id, qt):
         return CartProduct.objects.create(
             cart=self,
             count=qt, 
-            product=prod
+            product_id=prod_id
         )
 
-    def add(self, prod, qt):
+    def add(self, prod_id, qt):
         """ add updates the cart and returns 1 if succ or 0 otherwise"""
         if self.is_locked:
             return 0
         if qt < 0: 
             return 0
-        cart_prod = self.get_cartprod(prod)
+        cart_prod = self.get_cartprod(prod_id)
         if cart_prod.exists():
             if qt == 0:
                 cart_prod.delete()
             else:
-                cart_prod.update(count=qt)
+                res=cart_prod.update(count=qt)
         else:
             try:
-                self.create_cartprod(prod, qt)
+                self.create_cartprod(prod_id, qt)
             except IntegrityError as e:
                 return 0
         return 1
