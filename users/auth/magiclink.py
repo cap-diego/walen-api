@@ -27,7 +27,7 @@ class MagicLinkAuth:
         except DIDTokenError as e:
             return False, 'didtoken invalid'
     
-        coincide, err = self._email_coincide_with_token(didtoken)
+        coincide, err = self._email_coincide_with_token(didtoken, email)
         if not coincide:
             return False, err
 
@@ -35,7 +35,7 @@ class MagicLinkAuth:
 
     def _email_coincide_with_token(self, didtoken, email):
         try:
-            magic_response = magic.User.get_metadata_by_token(didtoken)
+            magic_response = self.magic.User.get_metadata_by_token(didtoken)
         except RequestError as e:
             return False, 'error verifying email and token: {}'.format(e)
 
