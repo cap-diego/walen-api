@@ -28,6 +28,9 @@ class Product(models.Model):
     category = models.ForeignKey(to=Category, on_delete=models.SET_NULL,
         related_name='products', null=True)
 
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
         return self.display_name
     
@@ -50,6 +53,9 @@ class ProductReview(models.Model):
     author_name = models.CharField(max_length=50)
     commentary = models.TextField()
     
+    class Meta:
+        ordering = ['-date']
+        
     class Rating(models.IntegerChoices):
             BAD = 1
             NOT_GOOD = 2
