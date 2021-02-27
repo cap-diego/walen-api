@@ -2,7 +2,7 @@
 from django.urls import path, include
 
 # From drf 
-from rest_framework import routers, serializers, viewsets
+from rest_framework import routers
 
 # From w
 from products import views
@@ -13,7 +13,4 @@ router = routers.DefaultRouter()
 router.register(r'categories', CategoryViewSet)
 router.register(r'', ProductViewSet)
 
-urlpatterns = [
-    # path('<int:idprod>/<int:idpurch>', views.first_view),
-    path('', include(router.urls))
-]
+urlpatterns = router.urls

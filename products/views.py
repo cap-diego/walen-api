@@ -1,9 +1,8 @@
 # From django
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 # From drf 
-from rest_framework import routers, serializers, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
