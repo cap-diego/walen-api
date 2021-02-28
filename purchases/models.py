@@ -7,7 +7,7 @@ import uuid
 
 # From w
 from purchases.constants import PURCHASE_STATUS_CHOICES, \
-    PURCHASE_STATUS_AWAITING_PEERS 
+    PURCHASE_STATUS_PEND_INIT_PAY
 from carts.models import Cart 
 from users.models import Address
 
@@ -22,7 +22,7 @@ class Purchase(models.Model):
 
     status = models.CharField(choices=PURCHASE_STATUS_CHOICES,
                                 max_length=3,
-                                default=PURCHASE_STATUS_AWAITING_PEERS)
+                                default=PURCHASE_STATUS_PEND_INIT_PAY)
 
     clients_target = models.PositiveSmallIntegerField()
     

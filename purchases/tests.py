@@ -12,7 +12,7 @@ from purchases.models import Purchase
 from carts.models import Cart
 from users.models import Address
 from products.models import Product
-from purchases.constants import PURCHASE_STATUS_AWAITING_PEERS
+from purchases.constants import PURCHASE_STATUS_PEND_INIT_PAY
 
 class PurchaseTestCase(TestCase):
 
@@ -24,9 +24,9 @@ class PurchaseTestCase(TestCase):
         purchase = G(Purchase)
         assert purchase.current_confirmed_clients == 0
 
-    def test_new_purchase_has_awaiting_peers_status(self):
+    def test_new_purchase_has_pending_initial_payment_status(self):
         purchase = G(Purchase)
-        assert purchase.status == PURCHASE_STATUS_AWAITING_PEERS
+        assert purchase.status == PURCHASE_STATUS_PEND_INIT_PAY
 
     def test_clients_target_cant_be_less_than_zero(self):
         purchase = G(Purchase)
