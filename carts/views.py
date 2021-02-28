@@ -27,11 +27,21 @@ class CartViewSet(viewsets.ModelViewSet):
         else:
             data = request.data
         for prod_count in data:
-            updated = cart.add(prod_id=int(prod_count['product']), \
-                                qt=int(prod_count['count']))
+            prod_id = int(prod_count.get('product', -1))
+            count = int(prod_count.get('count', -1))
+            if not cartprod_is_valid(prod_id, count):
+                raise ValidationError('error, revise los campos')
+            
+            updated = cart.add(prod_id=prod_id, \
+                                qt=count)
             if not updated:
                 raise ValidationError('error updating cart')
 
         cart.refresh_from_db()
         cart_data = CartSerializer(cart).data
         return Response(cart_data)
+
+def cartprod_is_valid(prod_id, count):
+    if prod_id < 0 or count < 0:
+        return False
+    return True
