@@ -37,11 +37,11 @@ MAGIC_LINK_SECRET_KEY = os.environ.get('MAGIC_LINK_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG')
 
-CORS_ALLOWED_ORIGINS = [
-    '{}'.format(os.environ.get('BACK_HOST', '')),
-    '{}'.format(os.environ.get('FRONT_HOST', '')),
-]
-ALLOWED_HOSTS = CORS_ALLOWED_ORIGINS
+# CORS_ALLOWED_ORIGINS = [
+#     '{}'.format(os.environ.get('BACK_HOST', '')),
+#     '{}'.format(os.environ.get('FRONT_HOST', '')),
+# ]
+ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
