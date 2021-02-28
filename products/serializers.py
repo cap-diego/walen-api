@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 
 # From w
-from products.models import Product, Category, ProductReview
+from products.models import Product, Category, ProductReview, ProductPhoto
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,9 +25,15 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         fields = ['author_name', 'commentary', 'rating', 'date']
 
 
+class ProductPhotosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductPhoto
+        fields = ['photo']
+
 class ProductSerializer(serializers.ModelSerializer):
     measure_unit = serializers.CharField(source='get_measure_unit_display')
     tags = TagListingField(many=True, read_only=True)
+    photosURL = serializers.SerializerMethodField(method_name="get_photosURL")
     last_review = serializers.SerializerMethodField(method_name="get_last_review")
     category = CategorySerializer()
     class Meta:
@@ -40,4 +46,9 @@ class ProductSerializer(serializers.ModelSerializer):
         return ProductReviewSerializer(obj.reviews.last()).data
 
 
+    def get_photosURL(self, obj):
+        photos = ProductPhoto.objects.filter(product=obj)
 
+        serializer = ProductPhotosSerializer(photos, many=True)
+        
+        return serializer.data
