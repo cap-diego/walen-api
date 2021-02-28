@@ -24,7 +24,7 @@ def create_purchase(request):
 
     ship_area, err = get_or_create_addr(addr)
     if err:
-        return Response('error with shipment area body',
+        return Response('error with shipment area body: {}'.format(err),
             status=status.HTTP_400_BAD_REQUEST)
     
     try:
@@ -44,17 +44,17 @@ def create_purchase(request):
 
 def get_or_create_addr(addr):
     if addr is None:
-        return None, False
+        return None, ''
 
     serializer = AddressSerializer(data=addr)
     if not serializer.is_valid():
-        return None, True
+        return None, '{}'.format(serializer.errors)
     try:
         addr = serializer.save()
-    except Exception:
-        return None, True
+    except Exception as err:
+        return None, 'error creating Address:  [{}]'.format(err)
 
-    return addr, False
+    return addr, ''
     
 def serialize_purchase_info(data):
     serializer = PurchasePOSTSerializer(data=data)
