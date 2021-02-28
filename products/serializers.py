@@ -14,10 +14,16 @@ class TagListingField(serializers.RelatedField):
     def to_representation(self, value):
         return value.tag
 
+class ProductReviewPOSTSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReview
+        fields = ['product', 'author_name', 'commentary', 'rating', 'date']
+
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
         fields = ['author_name', 'commentary', 'rating', 'date']
+
 
 class ProductSerializer(serializers.ModelSerializer):
     measure_unit = serializers.CharField(source='get_measure_unit_display')
