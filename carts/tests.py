@@ -116,3 +116,15 @@ class CartAPITest(TestCase):
         assert cart.products.count() == 1
         response = c.get(url)
         assert total_before == response.json()['total']
+
+    def test_error_when_body_is_not_correct(self):
+        c = Client()
+        cart = G(Cart)
+        prod = G(Product)
+        body = {
+                "no_product_key": prod.id,
+                "no_count_key": 1,
+                }
+        url = reverse('cart-detail', kwargs={"pk": cart.id})
+        response = c.post('{}products/'.format(url), body)
+        assert response.status_code == 400
