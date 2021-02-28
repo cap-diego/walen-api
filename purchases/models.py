@@ -75,7 +75,7 @@ class Purchase(models.Model):
         return self.cart_price - self.discount_amount
 
     @property
-    def shipmentAreaRadius(self):
+    def shipment_area_radius(self):
         """ represents the max distance to 
             delivery a groupal purchase
         """

@@ -12,6 +12,12 @@ from carts.models import Cart
 class PurchaseGETSerializer(serializers.ModelSerializer):
     shipment_area_center = AddressSerializer()
     status = serializers.CharField(source="get_status_display")
+    clients_left = serializers.ReadOnlyField()
+    clients_target_reached = serializers.ReadOnlyField()
+    cart_price = serializers.ReadOnlyField()
+    amount_to_pay = serializers.ReadOnlyField()
+    shipment_area_radius = serializers.ReadOnlyField()
+
     class Meta:
         model = Purchase
         fields = '__all__'
