@@ -37,10 +37,7 @@ MAGIC_LINK_SECRET_KEY = os.environ.get('MAGIC_LINK_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG')
 
-ALLOWED_HOSTS = [
-    os.environ.get('BACK_HOST'),
-    os.environ.get('FRONT_HOST')
-    ]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
