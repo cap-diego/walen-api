@@ -33,7 +33,7 @@ class ProductPhotosSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     measure_unit = serializers.CharField(source='get_measure_unit_display')
     tags = TagListingField(many=True, read_only=True)
-    photosURL = serializers.SerializerMethodField(method_name="get_photosURL")
+    photos_url = serializers.SerializerMethodField(method_name="get_photosURL")
     last_review = serializers.SerializerMethodField(method_name="get_last_review")
     category = CategorySerializer()
     class Meta:
