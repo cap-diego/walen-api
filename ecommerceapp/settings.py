@@ -38,12 +38,9 @@ MAGIC_LINK_SECRET_KEY = os.environ.get('MAGIC_LINK_SECRET_KEY')
 DEBUG = os.environ.get('DEBUG')
 
 CORS_ALLOWED_ORIGINS = [
-    '{}'.format(os.environ.get('BACK_HOST', '')),
-    '{}'.format(os.environ.get('FRONT_HOST', '')),
+    '{}'.format(os.environ.get('ALLOWED_HOST', '')),
 ]
 ALLOWED_HOSTS = CORS_ALLOWED_ORIGINS
-
-#["*"]
 
 # Application definition
 INSTALLED_APPS = [
