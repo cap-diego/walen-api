@@ -37,8 +37,11 @@ MAGIC_LINK_SECRET_KEY = os.environ.get('MAGIC_LINK_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG')
 
-ALLOWED_HOSTS = ["*"]
-
+CORS_ALLOWED_ORIGINS = [
+    os.environ.get('BACK_HOST'),
+    os.environ.get('FRONT_HOST'),
+]
+ALLOWED_HOSTS = CORS_ALLOWED_ORIGINS
 
 # Application definition
 INSTALLED_APPS = [
@@ -48,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'users',
     'products',
@@ -59,6 +63,7 @@ AUTH_USER_MODEL = 'users.User'
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -154,3 +159,4 @@ USE_TZ = True
 # Activate Django-Heroku.
 if not TESTING:
     django_heroku.settings(locals())
+
