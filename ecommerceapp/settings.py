@@ -41,7 +41,9 @@ CORS_ALLOWED_ORIGINS = [
     '{}'.format(os.environ.get('BACK_HOST', '')),
     '{}'.format(os.environ.get('FRONT_HOST', '')),
 ]
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = CORS_ALLOWED_ORIGINS
+
+#["*"]
 
 # Application definition
 INSTALLED_APPS = [
