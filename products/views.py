@@ -34,6 +34,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['POST'])
     def new_review(self, request, pk=None):
+        product = get_object_or_404(self.queryset, pk=pk)
+        request.data['product'] = product.pk
         serializer = ProductReviewPOSTSerializer(data=request.data)
         if not serializer.is_valid():
             return Response('body review invalido', status=status.HTTP_400_BAD_REQUEST)
