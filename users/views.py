@@ -21,7 +21,7 @@ User = get_user_model()
 @api_view(['POST'])
 @permission_classes([])
 @did_token_required
-def new(request):
+def create_user_view(request):
     data, err = parse_req_body_to_user_data(request.data)
     if err:
         return Response('error parsing body: {}'.format(err), \
@@ -40,7 +40,7 @@ def new(request):
 @api_view(['GET'])
 @permission_classes([])
 @email_in_url_required
-def get_user(request, email):
+def user_exists_view(request, email):
     users = User.objects.filter(email=email)
     if not users.exists():
         return Response({'description': 'email not registered'}, status=status.HTTP_404_NOT_FOUND)

@@ -3,6 +3,9 @@ from django.test import TestCase
 from django.test import Client as ClientReq
 from django.contrib.auth import get_user_model
 
+# From drf 
+from rest_framework.reverse import reverse
+
 # From w
 from users.models import Client
 
@@ -24,7 +27,8 @@ class UsersTestCase(TestCase):
         mock.return_value = _mock
         c = ClientReq()
         data = {'email': 'Juancito@gmail.com'}
-        response = c.post('/api/v1/users/new/', data, HTTP_AUTHORIZATION='un token')
+        url = reverse('user-create')
+        response = c.post(url, data, HTTP_AUTHORIZATION='un token')
         assert response.status_code == 201
         assert response.json()['email'] == response.json()['user']['username']
         assert response.json()['email'] == data['email']
@@ -32,7 +36,8 @@ class UsersTestCase(TestCase):
     def test_error_si_no_se_envia_token(self):
         c = ClientReq()
         data = {'email': 'Juancito@gmail.com'}
-        response = c.post('/api/v1/users/new/', data)
+        url = reverse('user-create')
+        response = c.post(url, data)
         assert response.status_code == 400
         assert response.json() == 'error, expected token'
 
@@ -44,7 +49,8 @@ class UsersTestCase(TestCase):
         mock.return_value = _mock
         c = ClientReq()
         data = {'email': 'Juancito@gmail.com'}
-        response = c.post('/api/v1/users/new/', data, HTTP_AUTHORIZATION='un token')
+        url = reverse('user-create')
+        response = c.post(url, data, HTTP_AUTHORIZATION='un token')
         assert response.status_code == 400
         assert response.json() == reason_invalid
 
@@ -56,7 +62,8 @@ class UsersTestCase(TestCase):
         c = ClientReq()
         data = {'email': 'Juancito@gmail.com'}
         self.crear_cliente(c, data)
-        response = c.post('/api/v1/users/new/', data, HTTP_AUTHORIZATION='un token')
+        url = reverse('user-create')
+        response = c.post(url, data, HTTP_AUTHORIZATION='un token')
         assert response.status_code == 400
         assert response.json() == 'error, {} already registered'.format(data['email'])
 
@@ -74,11 +81,13 @@ class UsersTestCase(TestCase):
         
         data = {'email': 'Juancito@gmail.com'}
         self.crear_cliente(c, data)
-        response = c.get('/api/v1/users/{}'.format(data['email']))
+        url = reverse('user-exists', args=[data['email']])
+        response = c.get(url)
         assert response.status_code == 200
 
     def test_usuario_no_existe_por_mail(self):
         c = ClientReq()
         email = 'Juancito@gmail.com'
-        response = c.get('/api/v1/users/{}'.format(email))
+        url = reverse('user-exists', args=[email])
+        response = c.get(url)
         assert response.status_code == 404
