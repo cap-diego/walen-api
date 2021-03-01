@@ -35,17 +35,21 @@ class PurchaseTestCase(TestCase):
 
     def test_clients_target_cant_be_less_than_zero(self):
         purchase = G(Purchase)
-        with self.assertRaises(IntegrityError):
-            Purchase.objects.filter(pk=purchase.id).update(
-                clients_target=-1
-            )
+        with self.assertRaises(ValidationError):
+            purchase.clients_target = -1
+            purchase.save()
 
     def test_clients_confirmed_cant_be_less_than_zero(self):
         purchase = G(Purchase)
         with self.assertRaises(IntegrityError):
-            Purchase.objects.filter(pk=purchase.id).update(
-                current_confirmed_clients=-1
-            )        
+            purchase.current_confirmed_clients = -1
+            purchase.save()
+
+    def test_clients_target_cant_be_zero(self):
+        purchase = G(Purchase)
+        with self.assertRaises(ValidationError):
+            purchase.clients_target = 0
+            purchase.save()
 
     def test_clients_confirmed_cant_be_greater_than_target(self):
         purchase = G(Purchase, clients_target=1)

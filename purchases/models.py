@@ -51,8 +51,13 @@ class Purchase(models.Model):
 
     def clean(self):
         self.validate_confirmed_clients()
+        self.validate_clients_target_is_not_zero()
         return super().clean()
     
+    def validate_clients_target_is_not_zero(self):
+        if self.clients_target == 0:
+            raise ValidationError('error, clients target cant be zero')
+        
     def validate_confirmed_clients(self):
         if self.current_confirmed_clients > self.clients_target:
             raise ValidationError('error, purchase already reached clients target')
