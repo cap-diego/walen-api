@@ -186,7 +186,7 @@ class IndividualPurchaseAPITest(TestCase):
         assert 'error, purchase already reached clients target' in response.json()
 
 
-    def test_client_cant_have_multiple_individualss_to_same_purchase(self):
+    def test_client_cant_have_multiple_individuals_to_same_purchase(self):
         c = Client()
         addr = G(Address)
         cart = G(Cart)

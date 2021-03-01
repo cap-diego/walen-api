@@ -1,6 +1,7 @@
 # From django
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db import transaction
 
 class User(AbstractUser):
     email = models.EmailField(unique=True, blank=False, null=False)
@@ -12,12 +13,7 @@ class Client(models.Model):
                                 on_delete=models.SET_NULL,
                                 null=True
                                 )   
-    email = models.EmailField()
-
-
-def get_or_create_client(email):
-    client, _ = Client.objects.get_or_create(email=email)
-    return client
+    email = models.EmailField(unique=True)
 
 class Address(models.Model):
     commentary = models.CharField(max_length=255, blank=True)
@@ -59,3 +55,18 @@ def get_or_create_address(data):
     if addrs.exists():
         return addrs.first()
     return Address.objects.create(**data)
+
+
+def get_or_create_client(email):
+    client, _ = Client.objects.get_or_create(email=email)
+    return client
+
+@transaction.atomic
+def create_client(data):
+    email = data['email']
+    clients = Client.objects.filter(email=email)
+    if clients.exists():
+        return None, 'error, {} already registered'.format(email)
+    user = User.objects.create(**data)
+    client = Client.objects.create(email=email, user=user)
+    return client, ''
