@@ -128,3 +128,16 @@ class CartAPITest(TestCase):
         url = reverse('cart-detail', kwargs={"pk": cart.id})
         response = c.post('{}products/'.format(url), body)
         assert response.status_code == 400
+
+    def test_add_product_no_exists_error(self):
+        c = Client()
+        cart = G(Cart)
+        prod = G(Product)
+        invalid_prod_id = 2323
+        body = {
+                "product": invalid_prod_id,
+                "count": 1,
+                }
+        url = reverse('cart-detail', kwargs={"pk": cart.id})
+        response = c.post('{}products/'.format(url), body)
+        assert response.status_code == 400
