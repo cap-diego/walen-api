@@ -184,5 +184,29 @@ class IndividualPurchaseTest(TestCase):
         assert response.status_code == 400
         assert 'error, purchase already reached clients target' in response.json()
 
+
     def test_client_cant_have_multiple_individuals_to_same_purchase(self):
-        pass
+        c = Client()
+        addr = G(Address)
+        cart = G(Cart)
+        purchase = G(Purchase, cart=cart, clients_target=2)
+        body = {
+            'client_email': 'fabio@gmail.com',
+            'shipment_address': {
+                'city': 'Buenos Aires',
+                'state': 'CABA',
+                'floor_apt': 'PB',
+                'address_line': 'Avellaneda 281',
+                'country': 'Argentina',
+                'geocoding': None
+            }
+        }   
+
+        url = reverse('purchase-individual',
+                args=[purchase.id])
+        response = c.post(url, json.dumps(body), content_type='application/json')
+        assert response.status_code == 201
+
+        response = c.post(url, json.dumps(body), content_type='application/json')
+        assert response.status_code == 400
+        assert 'error, client cant buy twice in the same purchase' in response.json()

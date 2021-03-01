@@ -154,6 +154,12 @@ def create_shipment(addr):
     return Shipment.objects.create(shipment_address=addr)
 
 def create_individual_purchase(purchase, client, addr):
+    client_already = IndividualPurchase.objects.filter(
+        client=client
+    )
+    if client_already.exists():
+        return None, 'error, client cant buy twice in the same purchase'
+    
     try:
         individual = IndividualPurchase.objects.create(
             client=client,
