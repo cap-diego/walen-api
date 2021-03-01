@@ -133,6 +133,7 @@ class IndividualPurchaseTest(TestCase):
         assert ind_purchase.shipment.status == \
                     PAYMENT_STATUS_PENDING
 
+class IndividualPurchaseAPITest(TestCase):
 
     def test_body_creacion_individual_requiere_mail(self):
         c = Client()
@@ -150,7 +151,7 @@ class IndividualPurchaseTest(TestCase):
             }
         }   
 
-        url = reverse('purchase-individual',
+        url = reverse('individual-purchase-list',
                 args=[purchase.id])
         response = c.post(url, json.dumps(body), content_type='application/json')
         assert response.status_code == 400
@@ -173,7 +174,7 @@ class IndividualPurchaseTest(TestCase):
             }
         }   
 
-        url = reverse('purchase-individual',
+        url = reverse('individual-purchase-list',
                 args=[purchase.id])
         response = c.post(url, json.dumps(body), content_type='application/json')
         assert response.status_code == 201
@@ -185,7 +186,7 @@ class IndividualPurchaseTest(TestCase):
         assert 'error, purchase already reached clients target' in response.json()
 
 
-    def test_client_cant_have_multiple_individuals_to_same_purchase(self):
+    def test_client_cant_have_multiple_individualss_to_same_purchase(self):
         c = Client()
         addr = G(Address)
         cart = G(Cart)
@@ -202,7 +203,7 @@ class IndividualPurchaseTest(TestCase):
             }
         }   
 
-        url = reverse('purchase-individual',
+        url = reverse('individual-purchase-list',
                 args=[purchase.id])
         response = c.post(url, json.dumps(body), content_type='application/json')
         assert response.status_code == 201
@@ -210,3 +211,12 @@ class IndividualPurchaseTest(TestCase):
         response = c.post(url, json.dumps(body), content_type='application/json')
         assert response.status_code == 400
         assert 'error, client cant buy twice in the same purchase' in response.json()
+
+    def test_list_individual_purchase(self):
+        c = Client()
+        ind = G(IndividualPurchase)
+        url = reverse('individual-purchase-detail', \
+            args=[ind.pk])
+        response = c.get(url)
+
+        assert response.status_code == 200

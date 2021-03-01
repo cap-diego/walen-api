@@ -23,7 +23,7 @@ from users.models import Client, get_or_create_client, \
 
 @api_view(['POST'])
 @permission_classes([])
-def create_purchase(request):
+def create_purchase_view(request):
     addr = request.data.pop('shipment_area_center', None)
     info, err = serialize_purchase_info(request.data)
     if err:
@@ -66,7 +66,7 @@ def serialize_purchase_info(data):
 
 @api_view(['GET'])
 @permission_classes([])
-def get_purchase(request, purchase_id):
+def get_purchase_view(request, purchase_id):
     obj = get_object_or_404(Purchase, pk=purchase_id)
     serializer = PurchaseGETSerializer(obj)
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -75,7 +75,7 @@ def get_purchase(request, purchase_id):
 @api_view(['POST'])
 @permission_classes([])
 @transaction.atomic
-def create_individual(request, purchase_id):
+def create_individual_purchase_view(request, purchase_id):
     purchase = get_object_or_404(Purchase, pk=purchase_id)
     serializer = IndividualPurchasePOSTSerializer(data=request.data)
     if not serializer.is_valid():
@@ -99,5 +99,11 @@ def create_individual(request, purchase_id):
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+@api_view(['GET'])
+@permission_classes([])
+def list_individual_purchase_view(request, ind_purch_id):
+    individual_purchase = get_object_or_404(IndividualPurchase, pk=ind_purch_id)
 
+    serializer = IndividualPurchaseGETSerializer(individual_purchase)
 
+    return Response(serializer.data, status=status.HTTP_200_OK)

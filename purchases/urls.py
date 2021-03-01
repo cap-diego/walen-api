@@ -2,11 +2,21 @@
 from django.urls import path
 
 # From w
-from purchases.views import create_purchase, \
-    get_purchase, create_individual
+from purchases.views import create_purchase_view, \
+    get_purchase_view, create_individual_purchase_view, \
+        list_individual_purchase_view
 
 urlpatterns = [
-    path('',  create_purchase, name='purchase-list'),
-    path('<uuid:purchase_id>',  get_purchase, name='purchase-detail'),
-    path('<uuid:purchase_id>/individual',  create_individual, name='purchase-individual'),
+    path('',  create_purchase_view, name='purchase-list'),
+    
+    path('<uuid:purchase_id>',  get_purchase_view, \
+        name='purchase-detail'),
+    
+    path('<uuid:purchase_id>/individuals', \
+        create_individual_purchase_view, \
+        name='individual-purchase-list'),
+
+    path('individuals/<uuid:ind_purch_id>',
+        list_individual_purchase_view,
+        name='individual-purchase-detail' )
 ]
