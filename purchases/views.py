@@ -51,7 +51,7 @@ def create_purchase(request):
     if not locked:
         return Response('error locking cart',
             status=status.HTTP_400_BAD_REQUEST)
-            
+
     serializer = PurchaseGETSerializer(purchase)
 
     return Response(serializer.data, status=status.HTTP_201_CREATED)    
@@ -89,7 +89,7 @@ def create_individual(request, purchase_id):
     try:
         purchase.add_confirmed_client()
     except Exception as err:
-        raise ValidationError(err)
+        raise ValidationError(err.message)
     
     if err:
         return Response('{}'.format(err), status=status.HTTP_400_BAD_REQUEST)
