@@ -11,11 +11,11 @@ from rest_framework.exceptions import ValidationError
 # From 
 from purchases.models import Purchase, IndividualPurchase, \
     create_shipment, create_payment, create_individual_purchase, \
-        get_or_create_addr
+        get_or_create_addr, Payment
 
 from purchases.serializers import PurchaseGETSerializer, \
     PurchasePOSTSerializer, IndividualPurchasePOSTSerializer, \
-        IndividualPurchaseGETSerializer
+        IndividualPurchaseGETSerializer, PaymentSerializer
 
 from users.models import Client, get_or_create_client, \
     get_or_create_address
@@ -106,4 +106,11 @@ def list_individual_purchase_view(request, ind_purch_id):
 
     serializer = IndividualPurchaseGETSerializer(individual_purchase)
 
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([])
+def list_payment_view(request, payment_id):
+    payment = get_object_or_404(Payment, pk=payment_id)
+    serializer = PaymentSerializer(payment)
     return Response(serializer.data, status=status.HTTP_200_OK)
