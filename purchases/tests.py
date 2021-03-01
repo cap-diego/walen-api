@@ -19,7 +19,8 @@ from users.models import Address
 from products.models import Product
 from purchases.constants import PURCHASE_STATUS_PEND_INIT_PAY, \
     PAYMENT_STATUS_PENDING, SHIPMENT_STATUS_AWAITING_PAYMENT, \
-    PAYMENT_VENDOR_MP
+    PAYMENT_VENDOR_MP, PURCHASE_STATUS_AWAITING_PEERS, \
+    PURCHASE_STATUS_COMPLETED
 
 class PurchaseTestCase(TestCase):
 
@@ -183,7 +184,6 @@ class IndividualPurchaseAPITest(TestCase):
         purchase.refresh_from_db()
         assert purchase.clients_left == 2
 
-
     def test_client_cant_have_multiple_individuals_to_same_purchase(self):
         c = Client()
         addr = G(Address)
@@ -207,7 +207,6 @@ class IndividualPurchaseAPITest(TestCase):
 
         assert response.status_code == 200
 
-
     def test_si_la_purchase_alcanzo_target_falla_la_creac_de_individual(self):
         c = Client()
         addr = G(Address)
@@ -219,7 +218,6 @@ class IndividualPurchaseAPITest(TestCase):
         response = c.post(url, json.dumps(self.body_ok()), content_type='application/json')
         assert response.status_code == 400
         assert 'error, purchase already reached clients target' in response.json()
-
 
     @patch('ecommerceapp.time.APIClock')
     def test_add_individual_to_expired_purchase_fails(self, mock):
@@ -312,7 +310,6 @@ class PaymentVendorIntegrationTestCase(TestCase):
         assert response.status_code == 200
         assert payment.is_reserved
 
-
     @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')    
     def test_si_el_payment_se_reserva_se_descuenta_clients_left_de_purchase(self, mock):
         c = Client()
@@ -330,7 +327,7 @@ class PaymentVendorIntegrationTestCase(TestCase):
         assert response.status_code == 200 
         assert purchase.clients_left == before - 1
     
-    
+
     @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')    
     def test_si_el_payment_falla_no_se_descuenta_clients_left_de_purchase(self, mock):
         c = Client()
@@ -366,3 +363,61 @@ class PaymentVendorIntegrationTestCase(TestCase):
         purchase.refresh_from_db()
         assert response.status_code == 200 
         assert purchase.clients_left == before - 1
+
+
+class PurchasePaymentsAPIIntegrationTestCase(TestCase):
+
+    def body_ok(self):
+        return  {
+            "token": "224cbedda052cdda1fb36f1eb51d4d2b",
+            "payment_method_id": "visa",
+            "installments": 1,
+            "payer_email": "fabio12345@gmail.com",
+            "payment_vendor": PAYMENT_VENDOR_MP
+        }   
+    
+    @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')    
+    def test_primer_payment_pone_purchase_en_awaiting_peers(self, mock):
+        c = Client()
+        res = {'id': 13654}
+        mock.do.return_value = (res, True) 
+        purchase = G(Purchase, clients_target=2)
+        ind_purchase = G(IndividualPurchase, purchase=purchase)
+        payment = ind_purchase.payment
+        before = purchase.clients_left
+
+        url = reverse('payment-vendor-detail', args=[payment.id])
+
+        response = c.put(url, json.dumps(self.body_ok()), content_type='application/json')
+        purchase.refresh_from_db()
+        assert response.status_code == 200 
+        assert purchase.status == PURCHASE_STATUS_AWAITING_PEERS
+
+    @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')
+    def test_cuando_purchase_alcanza_clients_target_status_es_completed(self, mock):
+        c = Client()
+        res = {'id': 13654}
+        mock.do.return_value = (res, True) 
+        purchase = G(Purchase, clients_target=1)
+        ind_purchase = G(IndividualPurchase, purchase=purchase)
+        payment = ind_purchase.payment
+        before = purchase.clients_left
+
+        url = reverse('payment-vendor-detail', args=[payment.id])
+
+        response = c.put(url, json.dumps(self.body_ok()), content_type='application/json')
+        purchase.refresh_from_db()
+        assert response.status_code == 200 
+        assert purchase.status == PURCHASE_STATUS_COMPLETED
+
+
+class PurchaseSignalTestCase(TestCase):
+
+    @patch('purchases.signals.check_if_purchase_finished')
+    def test_purchase_clients_target_reached_se_pone_completed(self, mock):
+        
+        purchase = G(Purchase,  clients_target=1)
+        purchase.add_confirmed_client()
+        purchase.refresh_from_db()
+        assert purchase.is_completed
+    

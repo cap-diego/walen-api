@@ -12,7 +12,8 @@ from purchases.constants import PURCHASE_STATUS_CHOICES, \
     PAYMENT_STATUS_PENDING, SHIPMENT_STATUS_CHOICES, \
     SHIPMENT_STATUS_AWAITING_PAYMENT, \
     PAYMENT_VENDOR_CHOICES, PAYMENT_STATUS_RESERVED, \
-    PAYMENT_STATUS_FAILED, PURCHASE_STATUS_AWAITING_PEERS
+    PAYMENT_STATUS_FAILED, PURCHASE_STATUS_AWAITING_PEERS, \
+    PURCHASE_STATUS_COMPLETED
 
 from carts.models import Cart 
 from users.models import Address
@@ -73,6 +74,10 @@ class Purchase(models.Model):
         self.status = PURCHASE_STATUS_AWAITING_PEERS
         self.save()
 
+    def set_status_completed(self):
+        self.status = PURCHASE_STATUS_COMPLETED
+        self.save()        
+
     @property
     def clients_left(self): 
         return self.clients_target - self.current_confirmed_clients
@@ -99,7 +104,10 @@ class Purchase(models.Model):
     @property
     def expiration_date(self):
         return self.creation_date + timedelta(days=1)
-
+    
+    @property
+    def is_completed(self):
+        return self.status == PURCHASE_STATUS_COMPLETED
 
 class IndividualPurchase(models.Model):
 
@@ -127,8 +135,6 @@ class IndividualPurchase(models.Model):
 
     class Meta:
         ordering = ['-creation_date']
-
-
 
 class Payment(models.Model):
     id = models.UUIDField(primary_key=True, \
