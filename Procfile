@@ -1,2 +1,2 @@
 release: python manage.py migrate
-web: gunicorn ecommerceapp.wsgi
+web: newrelic-admin run-program gunicorn ecommerceapp.wsgi

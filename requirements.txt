@@ -8,3 +8,5 @@ django-heroku
 magic-admin
 django-cors-headers
 requests
+coverage
+newrelic
