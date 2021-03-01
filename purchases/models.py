@@ -9,8 +9,11 @@ from datetime import timedelta
 # From w
 from purchases.constants import PURCHASE_STATUS_CHOICES, \
     PURCHASE_STATUS_PEND_INIT_PAY, PAYMENT_STATUS_CHOICES, \
-        PAYMENT_STATUS_PENDING, SHIPMENT_STATUS_CHOICES, \
-            SHIPMENT_STATUS_AWAITING_PAYMENT
+    PAYMENT_STATUS_PENDING, SHIPMENT_STATUS_CHOICES, \
+    SHIPMENT_STATUS_AWAITING_PAYMENT, \
+    PAYMENT_VENDOR_CHOICES, PAYMENT_STATUS_RESERVED, \
+    PAYMENT_STATUS_FAILED, PURCHASE_STATUS_AWAITING_PEERS
+
 from carts.models import Cart 
 from users.models import Address
 from users.serializers import AddressSerializer
@@ -66,6 +69,10 @@ class Purchase(models.Model):
         self.current_confirmed_clients += 1
         self.save()
 
+    def set_status_awaiting_peers(self):
+        self.status = PURCHASE_STATUS_AWAITING_PEERS
+        self.save()
+
     @property
     def clients_left(self): 
         return self.clients_target - self.current_confirmed_clients
@@ -109,10 +116,12 @@ class IndividualPurchase(models.Model):
                                     related_name='individuals_purchases')
     
     shipment = models.OneToOneField(to='purchases.Shipment',
-                                    on_delete=models.CASCADE)
+                                    on_delete=models.CASCADE,
+                                    related_name='individual_purchase')
 
     payment = models.OneToOneField(to='purchases.Payment',
-                                    on_delete=models.CASCADE)
+                                    on_delete=models.CASCADE,
+                                    related_name='individual_purchase')
 
     creation_date = models.DateTimeField(auto_now=True)
 
@@ -130,6 +139,32 @@ class Payment(models.Model):
                                 default=PAYMENT_STATUS_PENDING,
                                 max_length=3)
 
+    vendor_payment_id = models.PositiveBigIntegerField(null=True)
+
+    vendor_name = models.CharField(choices=PAYMENT_VENDOR_CHOICES,
+                                    blank=True,
+                                    max_length=15)
+
+    def save_vendor_info(self, vendor_id, vendor_name):
+        self.vendor_payment_id = vendor_id
+        self.vendor_name = vendor_name
+        self.save()
+    
+    def set_status_reserved(self):
+        self.status = PAYMENT_STATUS_RESERVED
+        self.save()
+
+    def set_status_failed(self):
+        self.status = PAYMENT_STATUS_FAILED
+        self.save()
+
+    @property
+    def is_reserved(self):
+        return self.status == PAYMENT_STATUS_RESERVED
+    
+    @property
+    def failed(self):
+        return self.status == PAYMENT_STATUS_FAILED
 
 class Shipment(models.Model):
 
@@ -145,7 +180,6 @@ class Shipment(models.Model):
     shipment_address = models.ForeignKey(to=Address,
                                             on_delete=models.CASCADE,
                                             related_name='shipments')
-           
 
 def create_payment():
     return Payment.objects.create()

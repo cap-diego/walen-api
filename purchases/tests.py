@@ -7,17 +7,19 @@ from django.urls import reverse
 
 # utils 
 import json
+from unittest.mock import patch, MagicMock
 
 # From ddf 
 from ddf import G
 
 # From w 
-from purchases.models import Purchase, IndividualPurchase
+from purchases.models import Purchase, IndividualPurchase, Payment
 from carts.models import Cart
 from users.models import Address
 from products.models import Product
 from purchases.constants import PURCHASE_STATUS_PEND_INIT_PAY, \
-    PAYMENT_STATUS_PENDING, SHIPMENT_STATUS_AWAITING_PAYMENT
+    PAYMENT_STATUS_PENDING, SHIPMENT_STATUS_AWAITING_PAYMENT, \
+    PAYMENT_VENDOR_MP
 
 class PurchaseTestCase(TestCase):
 
@@ -223,3 +225,78 @@ class IndividualPurchaseAPITest(TestCase):
 
     def test_cant_add_individual_to_expired_purchase(self):
         pass
+
+class PaymentVendorIntegrationTestCase(TestCase):
+    
+    @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')
+    def test_al_reservar_pago_payment_se_actualiza_payment_status(self, mock):
+        c = Client()
+        res = {'id': 13654}
+        mock.do.return_value = (res, True) 
+        purchase = G(Purchase, clients_target=2)
+        ind_purchase = G(IndividualPurchase)
+        payment = ind_purchase.payment
+   
+        url = reverse('payment-vendor-detail', args=[payment.id])
+
+        response = c.put(url, json.dumps(self.body_ok()), content_type='application/json')
+        payment.refresh_from_db()
+        assert response.status_code == 200
+        assert payment.is_reserved
+        assert payment.vendor_payment_id == res['id']
+        assert payment.vendor_name == PAYMENT_VENDOR_MP
+
+    def body_ok(self):
+        return  {
+            "token": "224cbedda052cdda1fb36f1eb51d4d2b",
+            "payment_method_id": "visa",
+            "installments": 1,
+            "payer_email": "fabio12345@gmail.com",
+            "payment_vendor": PAYMENT_VENDOR_MP
+        }   
+
+    def test_no_se_puede_reservar_dos_veces_el_mismo_pago(self):
+        c = Client()
+        purchase = G(Purchase, clients_target=2)
+        ind_purchase = G(IndividualPurchase)
+        payment = ind_purchase.payment
+        payment.set_status_reserved()
+
+        url = reverse('payment-vendor-detail', args=[payment.id])
+
+        response = c.put(url, json.dumps(self.body_ok()), 
+            content_type='application/json')        
+        assert response.status_code == 400
+    
+    @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')
+    def test_si_falla_reserva_payment_status_queda_en_failed(self, mock):
+        c = Client()
+        mock.do.return_value = (None, False) 
+        purchase = G(Purchase, clients_target=2)
+        ind_purchase = G(IndividualPurchase)
+        payment = ind_purchase.payment
+   
+        url = reverse('payment-vendor-detail', args=[payment.id])
+
+        response = c.put(url, json.dumps(self.body_ok()), 
+            content_type='application/json')
+        payment.refresh_from_db()
+        assert response.status_code == 400
+        assert payment.failed
+
+    @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')
+    def test_es_posible_reintentar_pago_fallado(self, mock):
+        c = Client()
+        mock.do.return_value = ({'id': 23232}, True) 
+        purchase = G(Purchase, clients_target=2)
+        ind_purchase = G(IndividualPurchase)
+        payment = ind_purchase.payment
+        payment.set_status_failed()
+        url = reverse('payment-vendor-detail', args=[payment.id])
+
+        response = c.put(url, json.dumps(self.body_ok()), 
+            content_type='application/json')
+        payment.refresh_from_db()
+        assert response.status_code == 200
+        assert payment.is_reserved
+        

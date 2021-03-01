@@ -152,6 +152,12 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Payment ENVS
+MERCADO_PAGO_BASE_URL = os.environ.get('MERCADO_PAGO_BASE_URL', 
+    'https://api.mercadopago.com/v1/payments')
+
+MERCADO_PAGO_TIMEOUT = os.environ.get('MERCADO_PAGO_TIMEOUT', 8)
+MERCADO_PAGO_ACCESS_TOKEN = os.environ.get('MERCADO_PAGO_ACCESS_TOKEN', '')
 
 # Activate Django-Heroku.
 if not TESTING:

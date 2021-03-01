@@ -11,6 +11,7 @@ from users.serializers import AddressSerializer, \
     ClientSerializer
 from carts.models import Cart
 from carts.serializers import CartSerializer
+from purchases.constants import PAYMENT_VENDOR_CHOICES
 
 class PurchaseGETSerializer(serializers.ModelSerializer):
     shipment_area_center = AddressSerializer()
@@ -61,3 +62,10 @@ class IndividualPurchaseGETSerializer(serializers.ModelSerializer):
     class Meta:
         model = IndividualPurchase
         fields = '__all__'
+
+class PaymentPUTSerializer(serializers.Serializer):
+    payment_method_id = serializers.CharField()
+    token = serializers.CharField()
+    installments = serializers.IntegerField(min_value=1, max_value=24)
+    payer_email = serializers.EmailField()
+    payment_vendor = serializers.ChoiceField(choices=PAYMENT_VENDOR_CHOICES)

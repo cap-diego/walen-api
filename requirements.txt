@@ -7,4 +7,4 @@ django-dynamic-fixture
 django-heroku
 magic-admin
 django-cors-headers
-
+requests

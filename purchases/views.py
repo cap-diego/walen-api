@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 
-# From 
+# From w
 from purchases.models import Purchase, IndividualPurchase, \
     create_shipment, create_payment, create_individual_purchase, \
         get_or_create_addr, Payment, Shipment
@@ -16,10 +16,13 @@ from purchases.models import Purchase, IndividualPurchase, \
 from purchases.serializers import PurchaseGETSerializer, \
     PurchasePOSTSerializer, IndividualPurchasePOSTSerializer, \
         IndividualPurchaseGETSerializer, PaymentSerializer, \
-            ShipmentSerializer
+            ShipmentSerializer, PaymentPUTSerializer
 
 from users.models import Client, get_or_create_client, \
     get_or_create_address
+
+from purchases.constants import PAYMENT_VENDOR_MP
+from purchases.payment_vendors import mercadopago
 
 
 @api_view(['POST'])
@@ -123,3 +126,40 @@ def detail_shipment_view(request, shipment_id):
     payment = get_object_or_404(Shipment, pk=shipment_id)
     serializer = ShipmentSerializer(payment)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT'])
+@permission_classes([])
+@transaction.atomic
+def create_payment_view(request, payment_id):
+    payment = get_object_or_404(Payment, pk=payment_id)
+    purchase = payment.individual_purchase.purchase
+    serializer = PaymentPUTSerializer(data=request.data)
+    if payment.is_reserved:
+        error_msg = 'el pago ya esta reservado'
+        return Response(error_msg, status=status.HTTP_400_BAD_REQUEST)
+
+    if not serializer.is_valid():
+        return Response('error: {}'.format(serializer.errors),
+            status=status.HTTP_400_BAD_REQUEST)
+    
+    data = serializer.data
+    vendor_name = data['payment_vendor']
+
+    data['transaction_amount'] = purchase.amount_to_pay
+    data.pop('payment_vendor')
+
+    if vendor_name == PAYMENT_VENDOR_MP:
+        res, ok = mercadopago.MercadoPagoPaymentService.do(data=data)
+
+    if not ok:
+        payment.save_vendor_info(None, vendor_name)
+        payment.set_status_failed()
+        return Response('{}'.format(res), status=status.HTTP_400_BAD_REQUEST)
+
+    payment.save_vendor_info(res.get('id', None), vendor_name)
+    payment.set_status_reserved()
+
+    purchase.set_status_awaiting_peers()
+
+    return Response(status=status.HTTP_200_OK)
