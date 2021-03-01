@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 from purchases.models import Purchase, IndividualPurchase, \
     create_shipment, create_payment, create_individual_purchase, \
         get_or_create_addr, Payment, Shipment
-
+from ecommerceapp import time
 from purchases.serializers import PurchaseGETSerializer, \
     PurchasePOSTSerializer, IndividualPurchasePOSTSerializer, \
         IndividualPurchaseGETSerializer, PaymentSerializer, \
@@ -86,6 +86,10 @@ def create_individual_purchase_view(request, purchase_id):
         return Response('{}'.format(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
     serializer_data = serializer.data
     
+    if time.APIClock.date_is_expired(purchase.expiration_date):
+        error_msg = 'error, purchase expired'
+        return Response(error_msg, status=status.HTTP_400_BAD_REQUEST)
+
     if purchase.clients_target_reached:
         error_msg = 'error, purchase already reached clients target'
         return Response(error_msg, status=status.HTTP_400_BAD_REQUEST)

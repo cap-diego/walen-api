@@ -207,6 +207,7 @@ class IndividualPurchaseAPITest(TestCase):
 
         assert response.status_code == 200
 
+
     def test_si_la_purchase_alcanzo_target_falla_la_creac_de_individual(self):
         c = Client()
         addr = G(Address)
@@ -219,15 +220,23 @@ class IndividualPurchaseAPITest(TestCase):
         assert response.status_code == 400
         assert 'error, purchase already reached clients target' in response.json()
 
-    def test_cant_add_individual_to_expired_purchase(self):
+
+    @patch('ecommerceapp.time.APIClock')
+    def test_add_individual_to_expired_purchase_fails(self, mock):
         c = Client()
         addr = G(Address)
         cart = G(Cart)
         purchase = G(Purchase, cart=cart, clients_target=1)
-        purchase.add_confirmed_client()
+        
+        mock.date_is_expired().return_value = True
 
         url = reverse('individual-purchase-list',
                 args=[purchase.id])  
+        
+        response = c.post(url, json.dumps(self.body_ok()), content_type='application/json')
+
+        assert response.status_code == 400
+        assert response.json() == 'error, purchase expired'
 
 class PaymentVendorIntegrationTestCase(TestCase):
     
@@ -338,3 +347,22 @@ class PaymentVendorIntegrationTestCase(TestCase):
         assert response.status_code == 400
         assert purchase.clients_left == before
     
+
+    @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')    
+    @patch('ecommerceapp.time.APIClock')
+    def test_es_posible_actualizar_payment_con_Purchase_expirada(self, mock_time, mock_mp):
+        c = Client()
+        addr = G(Address)
+        cart = G(Cart)
+        purchase = G(Purchase, cart=cart, clients_target=1)
+        ind_purchase = G(IndividualPurchase, purchase=purchase)
+        mock_mp.do.return_value = ({'id': 13654}, True) 
+        mock_time.date_is_expired().return_value = True
+        before = purchase.clients_left
+        payment = ind_purchase.payment
+
+        url = reverse('payment-vendor-detail', args=[payment.id])
+        response = c.put(url, json.dumps(self.body_ok()), content_type='application/json')
+        purchase.refresh_from_db()
+        assert response.status_code == 200 
+        assert purchase.clients_left == before - 1
