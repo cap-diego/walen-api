@@ -11,11 +11,12 @@ from rest_framework.exceptions import ValidationError
 # From 
 from purchases.models import Purchase, IndividualPurchase, \
     create_shipment, create_payment, create_individual_purchase, \
-        get_or_create_addr, Payment
+        get_or_create_addr, Payment, Shipment
 
 from purchases.serializers import PurchaseGETSerializer, \
     PurchasePOSTSerializer, IndividualPurchasePOSTSerializer, \
-        IndividualPurchaseGETSerializer, PaymentSerializer
+        IndividualPurchaseGETSerializer, PaymentSerializer, \
+            ShipmentSerializer
 
 from users.models import Client, get_or_create_client, \
     get_or_create_address
@@ -60,9 +61,9 @@ def create_purchase_view(request):
 def serialize_purchase_info(data):
     serializer = PurchasePOSTSerializer(data=data)
     if not serializer.is_valid():
-        return None, True
+        return None, '{}'.format(serializer.errors)
         
-    return serializer.data, False
+    return serializer.data, ''
 
 @api_view(['GET'])
 @permission_classes([])
@@ -110,7 +111,15 @@ def list_individual_purchase_view(request, ind_purch_id):
 
 @api_view(['GET'])
 @permission_classes([])
-def list_payment_view(request, payment_id):
+def detail_payment_view(request, payment_id):
     payment = get_object_or_404(Payment, pk=payment_id)
     serializer = PaymentSerializer(payment)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([])
+def detail_shipment_view(request, shipment_id):
+    payment = get_object_or_404(Shipment, pk=shipment_id)
+    serializer = ShipmentSerializer(payment)
     return Response(serializer.data, status=status.HTTP_200_OK)
