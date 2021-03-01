@@ -41,12 +41,14 @@ class IndividualPurchasePOSTSerializer(serializers.Serializer):
     shipment_address = AddressSerializer()
 
 class PaymentSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source='get_status_display')
     class Meta:
         model = Payment
         fields = '__all__'
 
 class ShipmentSerializer(serializers.ModelSerializer):
     shipment_address = AddressSerializer()
+    status = serializers.CharField(source='get_status_display')
     class Meta:
         model = Shipment
         fields = '__all__'
