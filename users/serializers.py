@@ -7,7 +7,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import APIException
 
 # From w
-from users.models import Address, AddressGeoCodingResult
+from users.models import Address, AddressGeoCodingResult, \
+    Client
 
 User = get_user_model()
 
@@ -57,3 +58,8 @@ class AddressSerializer(serializers.ModelSerializer):
             )
         except Exception as err:
             raise APIException(err)
+
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = '__all__'

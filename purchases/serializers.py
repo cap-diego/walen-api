@@ -5,8 +5,10 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 # From w
-from purchases.models import Purchase
-from users.serializers import AddressSerializer
+from purchases.models import Purchase, IndividualPurchase, \
+    Shipment, Payment
+from users.serializers import AddressSerializer, \
+    ClientSerializer
 from carts.models import Cart
 from carts.serializers import CartSerializer
 
@@ -19,10 +21,12 @@ class PurchaseGETSerializer(serializers.ModelSerializer):
     cart_price = serializers.ReadOnlyField()
     amount_to_pay = serializers.ReadOnlyField()
     shipment_area_radius = serializers.ReadOnlyField()
-
+    expiration_date = serializers.ReadOnlyField()
+    
     class Meta:
         model = Purchase
         fields = '__all__'
+
 
 class PurchasePOSTSerializer(serializers.Serializer):
     
@@ -31,3 +35,27 @@ class PurchasePOSTSerializer(serializers.Serializer):
     clients_target = serializers.IntegerField()
 
     
+class IndividualPurchasePOSTSerializer(serializers.Serializer):
+
+    client_email = serializers.EmailField()
+    shipment_address = AddressSerializer()
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'
+
+class ShipmentSerializer(serializers.ModelSerializer):
+    shipment_address = AddressSerializer()
+    class Meta:
+        model = Shipment
+        fields = '__all__'
+
+class IndividualPurchaseGETSerializer(serializers.ModelSerializer):
+    client = ClientSerializer()
+    purchase = PurchaseGETSerializer()
+    shipment = ShipmentSerializer()
+    payment = PaymentSerializer()
+    class Meta:
+        model = IndividualPurchase
+        fields = '__all__'

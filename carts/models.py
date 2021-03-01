@@ -69,7 +69,7 @@ class Cart(models.Model):
             if qt == 0:
                 cart_prod.delete()
             else:
-                res=cart_prod.update(count=qt)
+                res = cart_prod.update(count=qt)
         else:
             try:
                 self.create_cartprod(prod_id, qt)
@@ -82,6 +82,7 @@ class Cart(models.Model):
             return 0
         self.locked = True
         self.save()
+        return 1
 
 class CartProduct(models.Model):
     cart = models.ForeignKey(to=Cart, \

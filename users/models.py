@@ -12,10 +12,12 @@ class Client(models.Model):
                                 on_delete=models.SET_NULL,
                                 null=True
                                 )   
+    email = models.EmailField()
 
-    # address = models.ForeignKey(to='users.Address',
-    #                             on_delete=models.CASCADE,
-    #                             related_name="client")
+
+def get_or_create_client(email):
+    client, _ = Client.objects.get_or_create(email=email)
+    return client
 
 class Address(models.Model):
     commentary = models.CharField(max_length=255, blank=True)
@@ -46,3 +48,14 @@ class AddressGeoCodingResult(models.Model):
     country_code = models.CharField(max_length=30)
     map_url = models.URLField(blank=True)
 
+def get_or_create_address(data):
+    addrs = Address.objects.filter(
+        city=data['city'],
+        state=data['state'],
+        floor_apt=data['floor_apt'],
+        address_line=data['address_line'],
+        country=data['country']
+    )
+    if addrs.exists():
+        return addrs.first()
+    return Address.objects.create(**data)

@@ -1,18 +1,23 @@
-# From djangoo
+# From django
 from django.test import TestCase
 from django.test import Client
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
+from django.urls import reverse
+
+# utils 
+import json
 
 # From ddf 
 from ddf import G
 
 # From w 
-from purchases.models import Purchase
+from purchases.models import Purchase, IndividualPurchase
 from carts.models import Cart
 from users.models import Address
 from products.models import Product
-from purchases.constants import PURCHASE_STATUS_PEND_INIT_PAY
+from purchases.constants import PURCHASE_STATUS_PEND_INIT_PAY, \
+    PAYMENT_STATUS_PENDING
 
 class PurchaseTestCase(TestCase):
 
@@ -57,3 +62,94 @@ class PurchaseTestCase(TestCase):
                         discount_amount=10,
                         cart=cart)
         assert purchase.amount_to_pay == 40
+
+
+class PurchaseCartAPIIntegrationTest(TestCase):
+
+    def test_create_purchase_blocks_associated_cart(self):
+        c = Client()
+        product = G(Product, unitary_price=50)
+        cart = G(Cart)
+        cart.add(prod_id=product.id, qt=1)
+        purchase = G(Purchase, cart=cart)
+        body = {
+            "cart_id": '{}'.format(cart.id),
+            "clients_target": 1,
+            "shipment_area_center": {
+                "city": "Buenos Aires",
+                "state": "CABA",
+                "floor_apt": "1",
+                "address_line": "Maria ocampo 681",
+                "country": "Argentina",
+                "geocoding": None
+            }
+        }
+        url = reverse('purchase-list')
+
+        response = c.post(url, json.dumps(body), content_type='application/json')
+        cart.refresh_from_db()
+        assert response.status_code == 201
+        assert cart.is_locked
+    
+    def test_cant_create_purchase_with_empty_cart(self):
+        c = Client()
+        cart = G(Cart)
+        purchase = G(Purchase, cart=cart)
+        body = {
+            "cart_id": '{}'.format(cart.id),
+            "clients_target": 1,
+            "shipment_area_center": {
+                "city": "Buenos Aires",
+                "state": "CABA",
+                "floor_apt": "1",
+                "address_line": "Maria ocampo 681",
+                "country": "Argentina",
+                "geocoding": None
+            }
+        }
+        url = reverse('purchase-list')
+
+        response = c.post(url, json.dumps(body), content_type='application/json')
+        cart.refresh_from_db()
+        assert response.status_code == 400
+        assert response.json() == 'error locking cart'
+
+
+class IndividualPurchaseTest(TestCase):
+
+    def test_payment_status_starts_on_pending(self):
+        
+        ind_purchase = G(IndividualPurchase)
+        assert ind_purchase.payment.status == \
+                    PAYMENT_STATUS_PENDING
+
+    def test_shipment_status_starts_on_pending(self):
+        
+        ind_purchase = G(IndividualPurchase)
+        assert ind_purchase.shipment.status == \
+                    PAYMENT_STATUS_PENDING
+
+
+    def test_body_creacion_individual_requiere_mail(self):
+        c = Client()
+        addr = G(Address)
+        cart = G(Cart)
+        purchase = G(Purchase, cart=cart)
+        body = {
+            'shipment_address': {
+                'city': 'Buenos Aires',
+                'state': 'CABA',
+                'floor_apt': 'PB',
+                'address_line': 'Avellaneda 281',
+                'country': 'Argentina',
+                'geocoding': None
+            }
+        }   
+
+        url = reverse('purchase-individual',
+                args=[purchase.id])
+        response = c.post(url, json.dumps(body), content_type='application/json')
+        assert response.status_code == 400
+
+    def test_si_la_purchase_alcanzo_target_falla(self):
+        pass
