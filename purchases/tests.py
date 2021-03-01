@@ -136,13 +136,9 @@ class IndividualPurchaseTest(TestCase):
                     SHIPMENT_STATUS_AWAITING_PAYMENT
 
 class IndividualPurchaseAPITest(TestCase):
-
-    def test_body_creacion_individual_requiere_mail(self):
-        c = Client()
-        addr = G(Address)
-        cart = G(Cart)
-        purchase = G(Purchase, cart=cart)
-        body = {
+    def body_ok(self):
+        return {
+            'client_email': 'fabio@gmail.com',
             'shipment_address': {
                 'city': 'Buenos Aires',
                 'state': 'CABA',
@@ -151,11 +147,27 @@ class IndividualPurchaseAPITest(TestCase):
                 'country': 'Argentina',
                 'geocoding': None
             }
-        }   
+        }
 
+    def body_no_ok(self): 
+        return {
+            'shipment_address': {
+                'city': 'Buenos Aires',
+                'state': 'CABA',
+                'floor_apt': 'PB',
+                'address_line': 'Avellaneda 281',
+                'country': 'Argentina',
+                'geocoding': None
+            }
+        }     
+    def test_body_creacion_individual_requiere_mail(self):
+        c = Client()
+        addr = G(Address)
+        cart = G(Cart)
+        purchase = G(Purchase, cart=cart)
         url = reverse('individual-purchase-list',
                 args=[purchase.id])
-        response = c.post(url, json.dumps(body), content_type='application/json')
+        response = c.post(url, json.dumps(self.body_no_ok()), content_type='application/json')
         assert response.status_code == 400
 
     def test_individual_purchase_not_change_purchase_clients_left(self):
@@ -163,21 +175,10 @@ class IndividualPurchaseAPITest(TestCase):
         addr = G(Address)
         cart = G(Cart)
         purchase = G(Purchase, cart=cart, clients_target=2)
-        body = {
-            'client_email': 'fabion@gmail.com',
-            'shipment_address': {
-                'city': 'Buenos Aires',
-                'state': 'CABA',
-                'floor_apt': 'PB',
-                'address_line': 'Avellaneda 281',
-                'country': 'Argentina',
-                'geocoding': None
-            }
-        }   
 
         url = reverse('individual-purchase-list',
                 args=[purchase.id])
-        response = c.post(url, json.dumps(body), content_type='application/json')
+        response = c.post(url, json.dumps(self.body_ok()), content_type='application/json')
         assert response.status_code == 201
         purchase.refresh_from_db()
         assert purchase.clients_left == 2
@@ -188,24 +189,12 @@ class IndividualPurchaseAPITest(TestCase):
         addr = G(Address)
         cart = G(Cart)
         purchase = G(Purchase, cart=cart, clients_target=2)
-        body = {
-            'client_email': 'fabio@gmail.com',
-            'shipment_address': {
-                'city': 'Buenos Aires',
-                'state': 'CABA',
-                'floor_apt': 'PB',
-                'address_line': 'Avellaneda 281',
-                'country': 'Argentina',
-                'geocoding': None
-            }
-        }   
-
         url = reverse('individual-purchase-list',
                 args=[purchase.id])
-        response = c.post(url, json.dumps(body), content_type='application/json')
+        response = c.post(url, json.dumps(self.body_ok()), content_type='application/json')
         assert response.status_code == 201
 
-        response = c.post(url, json.dumps(body), content_type='application/json')
+        response = c.post(url, json.dumps(self.body_ok()), content_type='application/json')
         assert response.status_code == 400
         assert 'error, client cant buy twice in the same purchase' in response.json()
 
@@ -224,26 +213,21 @@ class IndividualPurchaseAPITest(TestCase):
         cart = G(Cart)
         purchase = G(Purchase, cart=cart, clients_target=1)
         purchase.add_confirmed_client()
-        body = {
-            'client_email': 'fabio@gmail.com',
-            'shipment_address': {
-                'city': 'Buenos Aires',
-                'state': 'CABA',
-                'floor_apt': 'PB',
-                'address_line': 'Avellaneda 281',
-                'country': 'Argentina',
-                'geocoding': None
-            }
-        }   
-
         url = reverse('individual-purchase-list',
                 args=[purchase.id])        
-        response = c.post(url, json.dumps(body), content_type='application/json')
+        response = c.post(url, json.dumps(self.body_ok()), content_type='application/json')
         assert response.status_code == 400
         assert 'error, purchase already reached clients target' in response.json()
 
     def test_cant_add_individual_to_expired_purchase(self):
-        pass
+        c = Client()
+        addr = G(Address)
+        cart = G(Cart)
+        purchase = G(Purchase, cart=cart, clients_target=1)
+        purchase.add_confirmed_client()
+
+        url = reverse('individual-purchase-list',
+                args=[purchase.id])  
 
 class PaymentVendorIntegrationTestCase(TestCase):
     
