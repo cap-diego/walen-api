@@ -15,8 +15,8 @@ class Cart(models.Model):
     id = models.UUIDField(primary_key=True, \
         default=uuid.uuid4, editable=False, \
         verbose_name='Cart id' )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
     locked = models.BooleanField(default=False)
     products  = models.ManyToManyField(to=Product, \
         related_name='carts',
