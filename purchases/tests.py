@@ -158,14 +158,13 @@ class IndividualPurchaseAPITest(TestCase):
         response = c.post(url, json.dumps(body), content_type='application/json')
         assert response.status_code == 400
 
-
-    def test_si_la_purchase_alcanzo_target_falla(self):
+    def test_individual_purchase_not_change_purchase_clients_left(self):
         c = Client()
         addr = G(Address)
         cart = G(Cart)
-        purchase = G(Purchase, cart=cart, clients_target=1)
+        purchase = G(Purchase, cart=cart, clients_target=2)
         body = {
-            'client_email': 'fabio@gmail.com',
+            'client_email': 'fabion@gmail.com',
             'shipment_address': {
                 'city': 'Buenos Aires',
                 'state': 'CABA',
@@ -180,12 +179,8 @@ class IndividualPurchaseAPITest(TestCase):
                 args=[purchase.id])
         response = c.post(url, json.dumps(body), content_type='application/json')
         assert response.status_code == 201
-
-        body['client_email'] = 'fabricio@gmail.com'
-        
-        response = c.post(url, json.dumps(body), content_type='application/json')
-        assert response.status_code == 400
-        assert 'error, purchase already reached clients target' in response.json()
+        purchase.refresh_from_db()
+        assert purchase.clients_left == 2
 
 
     def test_client_cant_have_multiple_individuals_to_same_purchase(self):
@@ -222,6 +217,30 @@ class IndividualPurchaseAPITest(TestCase):
         response = c.get(url)
 
         assert response.status_code == 200
+
+    def test_si_la_purchase_alcanzo_target_falla_la_creac_de_individual(self):
+        c = Client()
+        addr = G(Address)
+        cart = G(Cart)
+        purchase = G(Purchase, cart=cart, clients_target=1)
+        purchase.add_confirmed_client()
+        body = {
+            'client_email': 'fabio@gmail.com',
+            'shipment_address': {
+                'city': 'Buenos Aires',
+                'state': 'CABA',
+                'floor_apt': 'PB',
+                'address_line': 'Avellaneda 281',
+                'country': 'Argentina',
+                'geocoding': None
+            }
+        }   
+
+        url = reverse('individual-purchase-list',
+                args=[purchase.id])        
+        response = c.post(url, json.dumps(body), content_type='application/json')
+        assert response.status_code == 400
+        assert 'error, purchase already reached clients target' in response.json()
 
     def test_cant_add_individual_to_expired_purchase(self):
         pass
@@ -299,4 +318,39 @@ class PaymentVendorIntegrationTestCase(TestCase):
         payment.refresh_from_db()
         assert response.status_code == 200
         assert payment.is_reserved
-        
+
+
+    @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')    
+    def test_si_el_payment_se_reserva_se_descuenta_clients_left_de_purchase(self, mock):
+        c = Client()
+        res = {'id': 13654}
+        mock.do.return_value = (res, True) 
+        purchase = G(Purchase, clients_target=2)
+        ind_purchase = G(IndividualPurchase, purchase=purchase)
+        payment = ind_purchase.payment
+        before = purchase.clients_left
+
+        url = reverse('payment-vendor-detail', args=[payment.id])
+
+        response = c.put(url, json.dumps(self.body_ok()), content_type='application/json')
+        purchase.refresh_from_db()
+        assert response.status_code == 200 
+        assert purchase.clients_left == before - 1
+    
+    
+    @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')    
+    def test_si_el_payment_falla_no_se_descuenta_clients_left_de_purchase(self, mock):
+        c = Client()
+        mock.do.return_value = (None, False) 
+        purchase = G(Purchase, clients_target=5)
+        ind_purchase = G(IndividualPurchase, purchase=purchase)
+        payment = ind_purchase.payment
+        before = purchase.clients_left
+
+        url = reverse('payment-vendor-detail', args=[payment.id])
+
+        response = c.put(url, json.dumps(self.body_ok()), content_type='application/json')
+        purchase.refresh_from_db()
+        assert response.status_code == 400
+        assert purchase.clients_left == before
+    

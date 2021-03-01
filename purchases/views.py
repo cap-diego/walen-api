@@ -86,15 +86,14 @@ def create_individual_purchase_view(request, purchase_id):
         return Response('{}'.format(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
     serializer_data = serializer.data
     
+    if purchase.clients_target_reached:
+        error_msg = 'error, purchase already reached clients target'
+        return Response(error_msg, status=status.HTTP_400_BAD_REQUEST)
+
     client = get_or_create_client(serializer.data['client_email'])
     addr = get_or_create_address(serializer_data['shipment_address'])
     individual, err = create_individual_purchase(purchase, client, addr)
-    
-    try:
-        purchase.add_confirmed_client()
-    except Exception as err:
-        raise ValidationError(err.message)
-    
+        
     if err:
         return Response('{}'.format(err), status=status.HTTP_400_BAD_REQUEST)
 
@@ -159,7 +158,10 @@ def create_payment_view(request, payment_id):
 
     payment.save_vendor_info(res.get('id', None), vendor_name)
     payment.set_status_reserved()
-
     purchase.set_status_awaiting_peers()
+    try:
+        purchase.add_confirmed_client()
+    except Exception as err:
+        raise ValidationError(err.message)
 
     return Response(status=status.HTTP_200_OK)
