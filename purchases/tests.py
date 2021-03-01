@@ -17,7 +17,7 @@ from carts.models import Cart
 from users.models import Address
 from products.models import Product
 from purchases.constants import PURCHASE_STATUS_PEND_INIT_PAY, \
-    PAYMENT_STATUS_PENDING
+    PAYMENT_STATUS_PENDING, SHIPMENT_STATUS_AWAITING_PAYMENT
 
 class PurchaseTestCase(TestCase):
 
@@ -127,11 +127,11 @@ class IndividualPurchaseTest(TestCase):
         assert ind_purchase.payment.status == \
                     PAYMENT_STATUS_PENDING
 
-    def test_shipment_status_starts_on_pending(self):
+    def test_shipment_status_starts_on_awaiting_payment(self):
         
         ind_purchase = G(IndividualPurchase)
         assert ind_purchase.shipment.status == \
-                    PAYMENT_STATUS_PENDING
+                    SHIPMENT_STATUS_AWAITING_PAYMENT
 
 class IndividualPurchaseAPITest(TestCase):
 
@@ -220,3 +220,6 @@ class IndividualPurchaseAPITest(TestCase):
         response = c.get(url)
 
         assert response.status_code == 200
+
+    def test_cant_add_individual_to_expired_purchase(self):
+        pass

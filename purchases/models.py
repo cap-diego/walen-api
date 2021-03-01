@@ -10,7 +10,7 @@ from datetime import timedelta
 from purchases.constants import PURCHASE_STATUS_CHOICES, \
     PURCHASE_STATUS_PEND_INIT_PAY, PAYMENT_STATUS_CHOICES, \
         PAYMENT_STATUS_PENDING, SHIPMENT_STATUS_CHOICES, \
-            SHIPMENT_STATUS_PENDING
+            SHIPMENT_STATUS_AWAITING_PAYMENT
 from carts.models import Cart 
 from users.models import Address
 from users.serializers import AddressSerializer
@@ -138,7 +138,7 @@ class Shipment(models.Model):
         verbose_name='Shipment id' )
     
     status = models.CharField(choices=SHIPMENT_STATUS_CHOICES,
-                                default=SHIPMENT_STATUS_PENDING,
+                                default=SHIPMENT_STATUS_AWAITING_PAYMENT,
                                 max_length=3)
 
 
