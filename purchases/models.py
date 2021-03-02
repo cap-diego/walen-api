@@ -195,6 +195,10 @@ class Payment(models.Model):
     @property
     def is_captured(self):
         return self.status == PAYMENT_STATUS_CAPTURED
+    
+    @property
+    def individual_purchase_id(self):
+        return self.individual_purchase.id
 
 class Shipment(models.Model):
 

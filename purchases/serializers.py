@@ -43,6 +43,7 @@ class IndividualPurchasePOSTSerializer(serializers.Serializer):
 
 class PaymentSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source='get_status_display')
+    individual_purchase_id = serializers.ReadOnlyField()
     class Meta:
         model = Payment
         fields = '__all__'
