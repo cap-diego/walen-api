@@ -4,6 +4,8 @@ from django.test import Client
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.contrib.auth import get_user_model
+from django.core import mail
 
 # utils 
 import json
@@ -15,12 +17,15 @@ from ddf import G
 # From w 
 from purchases.models import Purchase, IndividualPurchase, Payment
 from carts.models import Cart
-from users.models import Address
+from users.models import Address, Client as Cliente
 from products.models import Product
 from purchases.constants import PURCHASE_STATUS_PEND_INIT_PAY, \
     PAYMENT_STATUS_PENDING, SHIPMENT_STATUS_AWAITING_PAYMENT, \
     PAYMENT_VENDOR_MP, PURCHASE_STATUS_AWAITING_PEERS, \
     PURCHASE_STATUS_COMPLETED
+
+
+User = get_user_model()
 
 class PurchaseTestCase(TestCase):
 
@@ -530,3 +535,47 @@ class PurchaseSignalTestCase(TestCase):
         shipment.refresh_from_db()
 
         assert shipment.is_aborted
+
+
+
+class PurchaseNotificationEmailTestCase(TestCase):
+    
+    def test_purchase_completed_and_payments_captured_notifies_users(self):
+        purchase = G(Purchase, clients_target=2)
+        
+        client_1 = G(Cliente, email="pedro@gmail.com")
+        client_2 = G(Cliente, email="mariana@gmail.com")
+
+        individual1 = G(IndividualPurchase, 
+            purchase=purchase, client=client_1)
+
+        individual2 = G(IndividualPurchase, 
+            purchase=purchase, client=client_2)
+        
+        individual1.payment.set_status_captured()
+        individual2.payment.set_status_captured()
+        purchase.set_status_completed()
+
+        self.assertEqual(len(mail.outbox), purchase.clients_target)
+
+        self.assertEqual(mail.outbox[0].subject, 'Tu Compra fue completada!')
+
+
+    def test_purchase_completed_and_not_all_payments_captured_no_notifies_users(self):
+        purchase = G(Purchase, clients_target=2)
+        
+        client_1 = G(Cliente, email="pedro@gmail.com")
+        client_2 = G(Cliente, email="mariana@gmail.com")
+
+        individual1 = G(IndividualPurchase, 
+            purchase=purchase, client=client_1)
+
+        individual2 = G(IndividualPurchase, 
+            purchase=purchase, client=client_2)
+        
+        individual1.payment.set_status_captured()
+        
+        purchase.set_status_completed()
+
+        self.assertEqual(len(mail.outbox), 0)
+

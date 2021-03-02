@@ -1,4 +1,6 @@
 from django.db import transaction
+from django.core import mail
+from django.conf import settings
 
 from purchases.payment_vendors import mercadopago
 from purchases.constants import PAYMENT_STATUS_CAPTURED
@@ -12,17 +14,39 @@ def update_purchase_related_models_status(sender, **kwargs):
 
     if purchase.is_completed:
         capture_payments(purchase)
+        check_if_notify_clients(purchase)
         return
 
-    if not purchase.clients_target_reached:
+    if purchase.clients_target_reached:
+        purchase.set_status_completed()
         return
-    
-    purchase.set_status_completed()
 
-    
+def check_if_notify_clients(purchase):
+    """
+        Si todos los payments estan capturados entonces
+        envia un mail a los clientes de las individual
+        purchases asociadas a la Purchase grupal
+    """
+    individuals = purchase.individuals_purchases
+    no_capturadas = individuals.exclude(payment__status=PAYMENT_STATUS_CAPTURED)
+    if not no_capturadas.exists():
+        for individual in individuals.all():
+            send_email_client(individual.client)
+
+def send_email_client(client):
+    platform_email = settings.PLATFORM_EMAIL
+    mail.send_mail(
+        'Tu Compra fue completada!', '',
+        platform_email, [client.email],
+        fail_silently=False,
+    )
+
 
 def capture_payments(purchase):
-    
+    """
+        Captura los Payments de la Completed Purchase que aun
+        no han sido capturados
+    """
     individuals = purchase.individuals_purchases
     individuals_sin_capturar = individuals.exclude(
                 payment__status=PAYMENT_STATUS_CAPTURED)
@@ -38,7 +62,10 @@ def capture_payments(purchase):
         
 
 def update_shipment_status(sender, **kwargs):
-    
+    """
+        Actualiza el estado del envio segun el estado
+        del payment
+    """
     payment = kwargs['instance']
     
     if payment.is_captured:
