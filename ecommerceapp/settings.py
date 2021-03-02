@@ -156,7 +156,7 @@ USE_TZ = True
 MERCADO_PAGO_BASE_URL = os.environ.get('MERCADO_PAGO_BASE_URL', 
     'https://api.mercadopago.com/v1/payments')
 
-MERCADO_PAGO_TIMEOUT = os.environ.get('MERCADO_PAGO_TIMEOUT', 8)
+MERCADO_PAGO_TIMEOUT = int(os.environ.get('MERCADO_PAGO_TIMEOUT', 8))
 MERCADO_PAGO_ACCESS_TOKEN = os.environ.get('MERCADO_PAGO_ACCESS_TOKEN', '')
 
 # Email configuration
