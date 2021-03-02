@@ -65,7 +65,7 @@ class MercadoPagoPaymentService:
             return error_msg, False
         else:
             if response.json()['status'] == expected_status:
-                return expected_status, True
+                return response.json(), True
             error_msg = '{} {}'.format(response.json()['status'], response.json()['status_detail'])
             return error_msg, False
                 
