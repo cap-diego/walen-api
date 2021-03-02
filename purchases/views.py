@@ -21,9 +21,13 @@ from purchases.serializers import PurchaseGETSerializer, \
 from users.models import Client, get_or_create_client, \
     get_or_create_address
 
-from purchases.constants import PAYMENT_VENDOR_MP
+from purchases.constants import PAYMENT_VENDOR_MP, \
+    PURCHASE_STATUS_CANCELLED
 from purchases.payment_vendors import mercadopago
 from carts.models import CartProduct
+
+PurchasesNoCancelled = \
+    Purchase.objects.exclude(status=PURCHASE_STATUS_CANCELLED)
 
 
 @api_view(['POST'])
@@ -99,8 +103,10 @@ def get_purchase_view(request, purchase_id):
 @permission_classes([])
 @transaction.atomic
 def create_individual_purchase_view(request, purchase_id):
-    purchase = get_object_or_404(Purchase, pk=purchase_id)
+
+    purchase = get_object_or_404(PurchasesNoCancelled, pk=purchase_id)
     serializer = IndividualPurchasePOSTSerializer(data=request.data)
+    
     if not serializer.is_valid():
         return Response('{}'.format(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
     serializer_data = serializer.data
@@ -188,3 +194,14 @@ def create_payment_view(request, payment_id):
         raise ValidationError(err.message)
 
     return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['PUT'])
+@permission_classes([])
+def cancel_puchase_view(request, purchase_id):
+    
+    purchase = get_object_or_404(Purchase, pk=purchase_id)
+
+    purchase.set_status_cancelled()
+
+    return Response(status=status.HTTP_204_NO_CONTENT)

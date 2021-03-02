@@ -277,6 +277,17 @@ class IndividualPurchaseAPITest(TestCase):
         assert response.status_code == 400
         assert response.json() == 'error, purchase expired'
 
+    def test_cant_create_individual_to_cancelled_purchase(self):
+        c = Client()
+        addr = G(Address)
+        cart = G(Cart)
+        purchase = G(Purchase, cart=cart, clients_target=2)
+        purchase.set_status_cancelled()
+        url = reverse('individual-purchase-list',
+                args=[purchase.id])
+        response = c.post(url, json.dumps(self.body_ok()), content_type='application/json')
+        assert response.status_code == 404
+
 class PaymentVendorIntegrationTestCase(TestCase):
     
     @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')
@@ -405,7 +416,6 @@ class PaymentVendorIntegrationTestCase(TestCase):
         assert response.status_code == 200 
         assert purchase.clients_left == before - 1
 
-
 class PurchasePaymentsAPIIntegrationTestCase(TestCase):
 
     def body_ok(self):
@@ -463,6 +473,16 @@ class PurchasePaymentsAPIIntegrationTestCase(TestCase):
 
         payment.refresh_from_db()
         assert payment.is_captured
+
+    def test_cancel_purchase(self):
+        c = Client()
+        purchase = G(Purchase, clients_target=2)
+
+        url = reverse('purchase-cancel', args=[purchase.id])
+
+        response = c.put(url)
+        assert response.status_code == 204
+
 
 class PurchaseSignalTestCase(TestCase):
 
