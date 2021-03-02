@@ -37,3 +37,31 @@ class MercadoPagoPaymentService:
             return error_msg, False
 
         return response.json(), True
+    
+    @classmethod
+    def capture(cls, purch_id):
+        error_msg = ''
+        breakpoint()
+        data = {
+            'capture': True
+        }
+
+        url = '{}{}'.format(settings.MERCADO_PAGO_BASE_URL, purch_id)
+        
+        try:
+            response = requests.put(url, \
+                    json=data, \
+                    headers=cls.headers, \
+                    timeout=settings.MERCADO_PAGO_TIMEOUT)
+        except Timeout:
+            error_msg = 'error timeout'
+        except ConnectionError as err:
+            error_msg = '{}'.format(err)
+        
+        if response.status_code not in [200, 201]:
+            error_msg = '{}'.format(response.json().get('message', ''))
+        
+        if error_msg:
+            return error_msg, False
+        
+        return response.json(), True

@@ -392,7 +392,7 @@ class PaymentVendorIntegrationTestCase(TestCase):
         c = Client()
         addr = G(Address)
         cart = G(Cart)
-        purchase = G(Purchase, cart=cart, clients_target=1)
+        purchase = G(Purchase, cart=cart, clients_target=3)
         ind_purchase = G(IndividualPurchase, purchase=purchase)
         mock_mp.do.return_value = ({'id': 13654}, True) 
         mock_time.date_is_expired().return_value = True
@@ -439,6 +439,7 @@ class PurchasePaymentsAPIIntegrationTestCase(TestCase):
         c = Client()
         res = {'id': 13654}
         mock.do.return_value = (res, True) 
+        mock.capture.return_value = (None, True)
         purchase = G(Purchase, clients_target=1)
         ind_purchase = G(IndividualPurchase, purchase=purchase)
         payment = ind_purchase.payment
@@ -450,6 +451,22 @@ class PurchasePaymentsAPIIntegrationTestCase(TestCase):
         purchase.refresh_from_db()
         assert response.status_code == 200 
         assert purchase.status == PURCHASE_STATUS_COMPLETED
+
+    @patch('purchases.payment_vendors.mercadopago.MercadoPagoPaymentService')
+    def test_completed_purchase_triggers_payment_capturing(self, mock):
+        c = Client()
+        mock.capture.return_value = (None, True)
+        purchase = G(Purchase, clients_target=1)
+        ind_purchase = G(IndividualPurchase, purchase=purchase)
+        payment = ind_purchase.payment
+        purchase.set_status_completed()
+
+        payment.refresh_from_db()
+        assert payment.is_captured
+
+    
+    def test_payment_captured_status_triggers_shipment_dispatched(self):
+        pass
 
 
 class PurchaseSignalTestCase(TestCase):

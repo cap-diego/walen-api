@@ -13,7 +13,7 @@ from purchases.constants import PURCHASE_STATUS_CHOICES, \
     SHIPMENT_STATUS_AWAITING_PAYMENT, \
     PAYMENT_VENDOR_CHOICES, PAYMENT_STATUS_RESERVED, \
     PAYMENT_STATUS_FAILED, PURCHASE_STATUS_AWAITING_PEERS, \
-    PURCHASE_STATUS_COMPLETED
+    PURCHASE_STATUS_COMPLETED, PAYMENT_STATUS_CAPTURED
 
 from carts.models import Cart 
 from users.models import Address
@@ -163,6 +163,10 @@ class Payment(models.Model):
     def set_status_failed(self):
         self.status = PAYMENT_STATUS_FAILED
         self.save()
+    
+    def set_status_captured(self):
+        self.status = PAYMENT_STATUS_CAPTURED
+        self.save()
 
     @property
     def is_reserved(self):
@@ -171,6 +175,10 @@ class Payment(models.Model):
     @property
     def failed(self):
         return self.status == PAYMENT_STATUS_FAILED
+
+    @property
+    def is_captured(self):
+        return self.status == PAYMENT_STATUS_CAPTURED
 
 class Shipment(models.Model):
 
