@@ -51,6 +51,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 class ShipmentSerializer(serializers.ModelSerializer):
     shipment_address = AddressSerializer()
     status = serializers.CharField(source='get_status_display')
+    individual_purchase_id = serializers.ReadOnlyField()
     class Meta:
         model = Shipment
         fields = '__all__'

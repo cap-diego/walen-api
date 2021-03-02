@@ -258,6 +258,9 @@ class Shipment(models.Model):
     def delivered(self):
      return self.status == SHIPMENT_STATUS_DELIVERED
 
+    @property
+    def individual_purchase_id(self):
+        return self.individual_purchase.id
 
 def create_payment():
     return Payment.objects.create()
