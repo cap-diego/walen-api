@@ -16,7 +16,8 @@ from purchases.constants import PURCHASE_STATUS_CHOICES, \
     PURCHASE_STATUS_COMPLETED, PAYMENT_STATUS_CAPTURED, \
     SHIPMENT_STATUS_PENDING, SHIPMENT_STATUS_ABORTED, \
     SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION, \
-    PURCHASE_STATUS_CANCELLED
+    PURCHASE_STATUS_CANCELLED, SHIPMENT_STATUS_DISPATCHED, \
+    SHIPMENT_STATUS_DELIVERED
 
 from carts.models import Cart 
 from users.models import Address
@@ -221,6 +222,14 @@ class Shipment(models.Model):
         self.status = SHIPMENT_STATUS_ABORTED
         self.save()
 
+    def set_status_dispatched(self):
+        self.status = SHIPMENT_STATUS_DISPATCHED
+        self.save()
+
+    def set_status_delivered(self):
+        self.status = SHIPMENT_STATUS_DELIVERED
+        self.save()
+
     @property
     def is_pending(self):
         return self.status == SHIPMENT_STATUS_PENDING
@@ -232,6 +241,15 @@ class Shipment(models.Model):
     @property
     def is_aborted(self):
         return self.status == SHIPMENT_STATUS_ABORTED
+
+    @property
+    def dispatched(self):
+        return self.status == SHIPMENT_STATUS_DISPATCHED
+
+    @property
+    def delivered(self):
+     return self.status == SHIPMENT_STATUS_DELIVERED
+
 
 def create_payment():
     return Payment.objects.create()

@@ -31,12 +31,13 @@ def check_if_notify_clients(purchase):
     no_capturadas = individuals.exclude(payment__status=PAYMENT_STATUS_CAPTURED)
     if not no_capturadas.exists():
         for individual in individuals.all():
-            send_email_client(individual.client)
+            send_email_client(individual.client, \
+                    subject='Tu Compra fue completada!')
 
-def send_email_client(client):
+def send_email_client(client, subject):
     platform_email = settings.PLATFORM_EMAIL
     mail.send_mail(
-        'Tu Compra fue completada!', '',
+        subject, '',
         platform_email, [client.email],
         fail_silently=False,
     )
@@ -83,3 +84,23 @@ def abort_shipments(purchase):
 
     for individual in individuals.all():
         individual.shipment.set_status_aborted()
+
+
+def shipment_status_notify_client(sender, **kwargs):
+    shipment = kwargs['instance']
+
+    if shipment.dispatched:
+        individual = shipment.individual_purchase
+        purchase = individual.purchase
+        client = individual.client 
+        send_email_client(client, \
+                subject='Purchase {} está en camino!'.format(purchase.id))
+        return
+
+    if shipment.delivered:
+        individual = shipment.individual_purchase
+        purchase = individual.purchase
+        client = individual.client 
+        send_email_client(client, \
+                subject='Purchase {} fue entregada! Que la disfrutes!'.format(purchase.id))
+        return

@@ -19,3 +19,7 @@ class PurchasesConfig(AppConfig):
         post_save.connect(signals.update_shipment_status, \
                 sender='purchases.Payment', \
                 dispatch_uid=uuid.uuid4())
+
+        post_save.connect(signals.shipment_status_notify_client, \
+                sender='purchases.Shipment', \
+                dispatch_uid=uuid.uuid4())

@@ -579,3 +579,40 @@ class PurchaseNotificationEmailTestCase(TestCase):
 
         self.assertEqual(len(mail.outbox), 0)
 
+
+    def test_shipment_dispatched_notify_user(self):
+        purchase = G(Purchase, clients_target=1)
+        
+        client = G(Cliente, email="pedro@gmail.com")
+
+        individual = G(IndividualPurchase, 
+            purchase=purchase, client=client)  
+
+        individual.shipment.set_status_dispatched()
+
+        subject = 'Purchase {} está en camino!'.format(purchase.id)
+
+        subject_enviados = ''
+        for i in range(len(mail.outbox)):
+            subject_enviados = mail.outbox[i].subject + " "
+
+        assert subject in subject_enviados
+
+
+    def test_shipment_delivered_notify_user(self):
+        purchase = G(Purchase, clients_target=1)
+        
+        client = G(Cliente, email="pedro@gmail.com")
+
+        individual = G(IndividualPurchase, 
+            purchase=purchase, client=client)  
+
+        individual.shipment.set_status_delivered()
+
+        subject = 'Purchase {} fue entregada! Que la disfrutes!'.format(purchase.id)
+
+        subject_enviados = ''
+        for i in range(len(mail.outbox)):
+            subject_enviados = mail.outbox[i].subject + " "
+
+        assert subject in subject_enviados
