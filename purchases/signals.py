@@ -6,6 +6,10 @@ from purchases.constants import PAYMENT_STATUS_CAPTURED
 def check_if_purchase_finished(sender, **kwargs):
     purchase = kwargs['instance']
 
+    if purchase.is_cancelled:
+        abort_shipments(purchase)
+        return
+
     if purchase.is_completed:
         capture_payments(purchase)
         return
@@ -41,7 +45,14 @@ def check_if_shipment_staus_should_be_pending(sender, **kwargs):
         shipment = payment.individual_purchase.shipment
         shipment.set_status_pending()
 
-
     if payment.is_reserved:
         shipment = payment.individual_purchase.shipment
         shipment.set_status_awaiting_purchase_completition()
+
+
+def abort_shipments(purchase):
+    
+    individuals = purchase.individuals_purchases
+
+    for individual in individuals.all():
+        individual.shipment.set_status_aborted()

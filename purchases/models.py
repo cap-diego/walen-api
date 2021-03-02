@@ -14,8 +14,9 @@ from purchases.constants import PURCHASE_STATUS_CHOICES, \
     PAYMENT_VENDOR_CHOICES, PAYMENT_STATUS_RESERVED, \
     PAYMENT_STATUS_FAILED, PURCHASE_STATUS_AWAITING_PEERS, \
     PURCHASE_STATUS_COMPLETED, PAYMENT_STATUS_CAPTURED, \
-    SHIPMENT_STATUS_PENDING, \
-    SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION
+    SHIPMENT_STATUS_PENDING, SHIPMENT_STATUS_ABORTED, \
+    SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION, \
+    PURCHASE_STATUS_CANCELLED
 
 from carts.models import Cart 
 from users.models import Address
@@ -78,7 +79,11 @@ class Purchase(models.Model):
 
     def set_status_completed(self):
         self.status = PURCHASE_STATUS_COMPLETED
-        self.save()        
+        self.save()      
+
+    def set_status_cancelled(self):
+        self.status = PURCHASE_STATUS_CANCELLED
+        self.save()  
 
     @property
     def clients_left(self): 
@@ -110,6 +115,10 @@ class Purchase(models.Model):
     @property
     def is_completed(self):
         return self.status == PURCHASE_STATUS_COMPLETED
+    
+    @property
+    def is_cancelled(self):
+        return self.status == PURCHASE_STATUS_CANCELLED
 
 class IndividualPurchase(models.Model):
 
@@ -204,6 +213,10 @@ class Shipment(models.Model):
         self.status = SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION
         self.save()
 
+    def set_status_aborted(self):
+        self.status = SHIPMENT_STATUS_ABORTED
+        self.save()
+
     @property
     def is_pending(self):
         return self.status == SHIPMENT_STATUS_PENDING
@@ -211,6 +224,10 @@ class Shipment(models.Model):
     @property
     def is_awaiting_purchase_completition(self):
         return self.status == SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION
+    
+    @property
+    def is_aborted(self):
+        return self.status == SHIPMENT_STATUS_ABORTED
 
 def create_payment():
     return Payment.objects.create()

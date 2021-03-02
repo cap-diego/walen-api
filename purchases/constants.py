@@ -28,7 +28,7 @@ SHIPMENT_STATUS_PENDING = 'pen' # Cuando se realizo la captura de la IndPurch y 
 SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION = 'apc' # Cuando se realiza la captura
 SHIPMENT_STATUS_DISPATCHED = 'dis' # Cuando sale el envio
 SHIPMENT_STATUS_DELIVERED = 'del' # Cuando se entrega el pedido
-SHIPMENT_STATUS_ABORTED = 'abr' # Cuando vence la Purchase asociada o falla la reserva o captura
+SHIPMENT_STATUS_ABORTED = 'abr' # Cuando se cancela su purchase
 
 SHIPMENT_STATUS_CHOICES = (
     (SHIPMENT_STATUS_AWAITING_PAYMENT, 'awaiting-payment'),

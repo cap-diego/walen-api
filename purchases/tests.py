@@ -493,5 +493,20 @@ class PurchaseSignalTestCase(TestCase):
         payment.set_status_captured()
         
         shipment = individual.shipment
+        
+        shipment.refresh_from_db()
 
         assert shipment.is_pending   
+    
+    def test_purchase_cancelled_put_shipment_aborted(self):
+        purchase = G(Purchase, clients_target=1)
+        individual = G(IndividualPurchase, purchase=purchase)
+        payment = individual.payment
+
+        purchase.set_status_cancelled()
+
+        shipment = individual.shipment
+        
+        shipment.refresh_from_db()
+
+        assert shipment.is_aborted
