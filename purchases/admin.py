@@ -10,7 +10,7 @@ def set_delivered(modeladmin, request, queryset):
 set_delivered.short_description = 'Actualizar como entregado'
 
 def set_dispatched(modeladmin, request, queryset):
-    queryset.update(status=SHIPMENT_STATUS_DELIVERED)
+    queryset.update(status=SHIPMENT_STATUS_DISPATCHED)
 set_dispatched.short_description = 'Actualizar como en camino'
 
 
