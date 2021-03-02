@@ -26,6 +26,10 @@ class Address(models.Model):
     geocoding = models.OneToOneField(to='users.AddressGeoCodingResult',
                                     null=True,
                                     on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return '{} {} (floor {})'.format(self.city, self.address_line, self.floor_apt)
+
 class AddressGeoCodingResult(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)

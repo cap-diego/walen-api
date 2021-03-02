@@ -35,8 +35,8 @@ SHIPMENT_STATUS_CHOICES = (
     (SHIPMENT_STATUS_PENDING, 'pending'),
     (SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION, 'awaiting-purchase-completition'),
     (SHIPMENT_STATUS_DISPATCHED, 'dispatched'),
-    (SHIPMENT_STATUS_DELIVERED, 'del'),
-    (SHIPMENT_STATUS_ABORTED, 'abr')
+    (SHIPMENT_STATUS_DELIVERED, 'delivered'),
+    (SHIPMENT_STATUS_ABORTED, 'aborted')
 )
 
 PAYMENT_VENDOR_MP = 'mercadopago'

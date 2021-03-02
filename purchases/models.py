@@ -205,6 +205,10 @@ class Shipment(models.Model):
     shipment_address = models.ForeignKey(to=Address,
                                             on_delete=models.CASCADE,
                                             related_name='shipments')
+
+    def __str__(self):
+        return 'Shipment {} [{}]'.format(self.id, self.get_status_display())
+
     def set_status_pending(self):
         self.status = SHIPMENT_STATUS_PENDING
         self.save()
