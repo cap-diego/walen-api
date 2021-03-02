@@ -159,8 +159,14 @@ MERCADO_PAGO_BASE_URL = os.environ.get('MERCADO_PAGO_BASE_URL',
 MERCADO_PAGO_TIMEOUT = os.environ.get('MERCADO_PAGO_TIMEOUT', 8)
 MERCADO_PAGO_ACCESS_TOKEN = os.environ.get('MERCADO_PAGO_ACCESS_TOKEN', '')
 
-# Email
-PLATFORM_EMAIL = os.environ.get('PLATFORM_EMAIL', '')
+# Email configuration
+DEFAULT_FROM_EMAIL = os.environ.get('PLATFORM_EMAIL', '')
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey'
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 # Activate Django-Heroku.
 if not TESTING:

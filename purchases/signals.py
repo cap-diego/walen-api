@@ -2,6 +2,9 @@ from django.db import transaction
 from django.core import mail
 from django.conf import settings
 
+import logging
+logger = logging.getLogger(__name__)
+
 from purchases.payment_vendors import mercadopago
 from purchases.constants import PAYMENT_STATUS_CAPTURED
 
@@ -21,6 +24,7 @@ def update_purchase_related_models_status(sender, **kwargs):
         purchase.set_status_completed()
         return
 
+
 def check_if_notify_clients(purchase):
     """
         Si todos los payments estan capturados entonces
@@ -35,12 +39,14 @@ def check_if_notify_clients(purchase):
                     subject='Tu Compra fue completada!')
 
 def send_email_client(client, subject):
-    platform_email = settings.PLATFORM_EMAIL
-    mail.send_mail(
-        subject, '',
-        platform_email, [client.email],
+    sent = mail.send_mail(
+        subject, 'El equipo de ecommerceapp te agradece la compra',
+        None, [client.email],
         fail_silently=False,
     )
+    if sent == 0:
+        logger.error('no fue posible enviar el mail a {}'.\
+            format(client.emal))
 
 
 def capture_payments(purchase):
@@ -48,6 +54,7 @@ def capture_payments(purchase):
         Captura los Payments de la Completed Purchase que aun
         no han sido capturados
     """
+
     individuals = purchase.individuals_purchases
     individuals_sin_capturar = individuals.exclude(
                 payment__status=PAYMENT_STATUS_CAPTURED)
@@ -60,7 +67,9 @@ def capture_payments(purchase):
 
         if ok:
             payment_i.set_status_captured()
-        
+        else:
+            logger.error('no fue posible capturar el pago de la purchase {}: {}'.
+                format(purchase.id, res))
 
 def update_shipment_status(sender, **kwargs):
     """
