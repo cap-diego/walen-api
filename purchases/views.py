@@ -23,6 +23,7 @@ from users.models import Client, get_or_create_client, \
 
 from purchases.constants import PAYMENT_VENDOR_MP
 from purchases.payment_vendors import mercadopago
+from carts.models import CartProduct
 
 
 @api_view(['POST'])
@@ -36,6 +37,13 @@ def create_purchase_view(request):
     cart_id = info['cart_id']
 
     ship_area, err = get_or_create_addr(addr)
+    stock_enough = stock_is_enough_for_cart(
+                    clients_target=clients_target,
+                    cart_id=cart_id)
+
+    if not stock_enough:
+        return Response('error, cant create purchase because stock is not enough',
+            status=status.HTTP_400_BAD_REQUEST)
 
     if err:
         return Response('error with shipment area body: {}'.format(err),
@@ -60,6 +68,17 @@ def create_purchase_view(request):
 
     return Response(serializer.data, status=status.HTTP_201_CREATED)    
 
+def stock_is_enough_for_cart(clients_target, cart_id):
+    cartprods = CartProduct.objects.filter(cart_id=cart_id)
+    for cp in cartprods:
+        if not stock_is_enough(cp.product, cp.count, clients_target):
+            return False
+    return True
+
+def stock_is_enough(prod, qt, cant_clients):
+    if prod.current_stock < (qt * cant_clients):
+        return False
+    return True
 
 def serialize_purchase_info(data):
     serializer = PurchasePOSTSerializer(data=data)

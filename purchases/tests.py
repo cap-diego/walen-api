@@ -70,7 +70,6 @@ class PurchaseTestCase(TestCase):
                         cart=cart)
         assert purchase.amount_to_pay == 40
 
-
 class PurchaseCartAPIIntegrationTest(TestCase):
 
     def test_create_purchase_blocks_associated_cart(self):
@@ -121,6 +120,48 @@ class PurchaseCartAPIIntegrationTest(TestCase):
         assert response.status_code == 400
         assert response.json() == 'error locking cart'
 
+    def test_cant_create_purchase_if_stock_is_not_enough(self):
+        c = Client()
+        product = G(Product, unitary_price=50, current_stock=3)
+        cart = G(Cart)
+        cart.add(prod_id=product.id, qt=2)
+        body = {
+            "cart_id": '{}'.format(cart.id),
+            "clients_target": 2,
+            "shipment_area_center": {
+                "city": "Buenos Aires",
+                "state": "CABA",
+                "floor_apt": "1",
+                "address_line": "Maria ocampo 681",
+                "country": "Argentina",
+                "geocoding": None
+            }
+        }
+        url = reverse('purchase-list')
+        response = c.post(url, json.dumps(body), content_type='application/json')
+        assert response.status_code == 400
+        assert response.json() == 'error, cant create purchase because stock is not enough'
+
+    def test_can_create_purchase_if_stock_is_enough(self):
+        c = Client()
+        product = G(Product, unitary_price=50, current_stock=4)
+        cart = G(Cart)
+        cart.add(prod_id=product.id, qt=2)
+        body = {
+            "cart_id": '{}'.format(cart.id),
+            "clients_target": 2,
+            "shipment_area_center": {
+                "city": "Buenos Aires",
+                "state": "CABA",
+                "floor_apt": "1",
+                "address_line": "Maria ocampo 681",
+                "country": "Argentina",
+                "geocoding": None
+            }
+        }
+        url = reverse('purchase-list')
+        response = c.post(url, json.dumps(body), content_type='application/json')
+        assert response.status_code == 201
 
 class IndividualPurchaseTest(TestCase):
 
