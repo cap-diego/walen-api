@@ -12,10 +12,10 @@ class PurchasesConfig(AppConfig):
     name = 'purchases'
 
     def ready(self):
-        post_save.connect(signals.check_if_purchase_finished, \
+        post_save.connect(signals.update_purchase_related_models_status, \
                 sender='purchases.Purchase', \
                 dispatch_uid=uuid.uuid4())
 
-        post_save.connect(signals.check_if_shipment_staus_should_be_pending, \
+        post_save.connect(signals.update_shipment_status, \
                 sender='purchases.Payment', \
                 dispatch_uid=uuid.uuid4())

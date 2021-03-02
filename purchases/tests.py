@@ -466,7 +466,7 @@ class PurchasePaymentsAPIIntegrationTestCase(TestCase):
 
 class PurchaseSignalTestCase(TestCase):
 
-    @patch('purchases.signals.check_if_purchase_finished')
+    @patch('purchases.signals.update_purchase_related_models_status')
     def test_purchase_clients_target_reached_se_pone_completed(self, mock):
         
         purchase = G(Purchase,  clients_target=1)

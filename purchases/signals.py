@@ -3,7 +3,7 @@ from django.db import transaction
 from purchases.payment_vendors import mercadopago
 from purchases.constants import PAYMENT_STATUS_CAPTURED
 
-def check_if_purchase_finished(sender, **kwargs):
+def update_purchase_related_models_status(sender, **kwargs):
     purchase = kwargs['instance']
 
     if purchase.is_cancelled:
@@ -37,7 +37,7 @@ def capture_payments(purchase):
             payment_i.set_status_captured()
         
 
-def check_if_shipment_staus_should_be_pending(sender, **kwargs):
+def update_shipment_status(sender, **kwargs):
     
     payment = kwargs['instance']
     
