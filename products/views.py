@@ -30,7 +30,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         permission_classes = []
-        if self.action == 'list':
+        if self.action == 'create':
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
