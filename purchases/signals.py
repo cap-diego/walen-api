@@ -38,9 +38,10 @@ def check_if_notify_clients(purchase):
             send_email_client(individual.client, \
                     subject='Tu Compra fue completada!')
 
-def send_email_client(client, subject):
+def send_email_client(client, subject, message=''):
+    message_default = 'El equipo de ecommerceapp te agradece la compra'
     sent = mail.send_mail(
-        subject, 'El equipo de ecommerceapp te agradece la compra',
+        subject, '{} \n{}'.format(message_default, message),
         None, [client.email],
         fail_silently=False,
     )
@@ -104,6 +105,7 @@ def shipment_status_notify_client(sender, **kwargs):
         individual = shipment.individual_purchase
         purchase = individual.purchase
         client = individual.client 
+        message = build_msg_shipment_dispatched(shipment)
         send_email_client(client, \
                 subject='Purchase {} está en camino!'.format(purchase.id))
         return
@@ -115,3 +117,9 @@ def shipment_status_notify_client(sender, **kwargs):
         send_email_client(client, \
                 subject='Purchase {} fue entregada! Que la disfrutes!'.format(purchase.id))
         return
+
+def build_msg_shipment_dispatched(shipment):
+    url_envio = '{}{}'.format(settings.BASE_URL_PAGE_SHIPMENT_STATUS, shipment.id)
+    msg1 =  'Podes seguir el envio desde: {}'.format(url_envio)
+    msg2 = 'Direccion envio: '.format(shipment.human_readable_address)
+    return '{} \n{}'.format(msg1, msg2)

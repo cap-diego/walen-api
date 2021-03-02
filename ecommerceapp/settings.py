@@ -168,6 +168,8 @@ EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
+BASE_URL_PAGE_SHIPMENT_STATUS=os.environ.get('BASE_URL_PAGE_SHIPMENT_STATUS')
+
 # Activate Django-Heroku.
 if not TESTING:
     django_heroku.settings(locals())

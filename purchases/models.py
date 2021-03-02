@@ -261,6 +261,10 @@ class Shipment(models.Model):
     @property
     def individual_purchase_id(self):
         return self.individual_purchase.id
+    
+    @property
+    def human_readable_address(self):
+        return self.shipment_address
 
 def create_payment():
     return Payment.objects.create()
