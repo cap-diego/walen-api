@@ -23,7 +23,7 @@ class PurchaseGETSerializer(serializers.ModelSerializer):
     amount_to_pay = serializers.ReadOnlyField()
     shipment_area_radius = serializers.ReadOnlyField()
     expiration_date = serializers.ReadOnlyField()
-    
+    discount_amount = serializers.ReadOnlyField()
     class Meta:
         model = Purchase
         fields = '__all__'

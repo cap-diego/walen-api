@@ -65,15 +65,24 @@ class PurchaseTestCase(TestCase):
         with self.assertRaises(ValidationError):
             purchase.add_confirmed_client()
 
+    def test_discount_is_zero_when_clients_target_is_one(self):
+        product = G(Product, unitary_price=50)
+        cart = G(Cart)
+        cart.add(prod_id=product.id, qt=1)
+        purchase = G(Purchase, clients_target=1, 
+                        cart=cart)
+        assert purchase.discount_amount == 0
+
     def test_amount_to_pay_is_cartprice_minus_amount_discount(self):
         product = G(Product, unitary_price=50)
         cart = G(Cart)
         cart.add(prod_id=product.id, qt=1)
         assert cart.total == 50
-        purchase = G(Purchase, clients_target=1, 
-                        discount_amount=10,
+        purchase = G(Purchase, clients_target=2, 
                         cart=cart)
-        assert purchase.amount_to_pay == 40
+        expected_discount = (purchase.clients_target - 1) * 0.1 * cart.total
+        assert purchase.amount_to_pay == 50 - expected_discount 
+        assert expected_discount == purchase.discount_amount
 
 class PurchaseCartAPIIntegrationTest(TestCase):
 

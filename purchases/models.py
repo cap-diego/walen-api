@@ -44,8 +44,6 @@ class Purchase(models.Model):
                                 on_delete=models.CASCADE,
                                 related_name='purchases')
     
-    discount_amount = models.PositiveSmallIntegerField(default=0)
-
     shipment_area_center = models.ForeignKey(to=Address,
                                             on_delete=models.CASCADE,
                                             related_name='purchases')
@@ -101,6 +99,10 @@ class Purchase(models.Model):
     @property 
     def amount_to_pay(self):
         return self.cart_price - self.discount_amount
+    
+    @property
+    def discount_amount(self):
+        return (self.clients_target - 1) * 0.1 * self.cart_price
 
     @property
     def shipment_area_radius(self):
