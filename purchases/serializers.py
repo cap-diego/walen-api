@@ -20,7 +20,7 @@ class PurchaseGETSerializer(serializers.ModelSerializer):
     clients_left = serializers.ReadOnlyField()
     clients_target_reached = serializers.ReadOnlyField()
     cart_price = serializers.ReadOnlyField()
-    amount_to_pay = serializers.ReadOnlyField()
+    amount = serializers.ReadOnlyField()
     shipment_area_radius = serializers.ReadOnlyField()
     expiration_date = serializers.ReadOnlyField()
     discount_amount = serializers.ReadOnlyField()

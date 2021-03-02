@@ -82,7 +82,7 @@ class PurchaseTestCase(TestCase):
         purchase = G(Purchase, clients_target=2, 
                         cart=cart)
         expected_discount = (purchase.clients_target - 1) * 0.1 * cart.total
-        assert purchase.amount_to_pay == 50 - expected_discount 
+        assert purchase.amount == 50 - expected_discount 
         assert expected_discount == purchase.discount_amount
     
     def test_no_se_puede_cancelar_purchase_completed(self):

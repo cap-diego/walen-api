@@ -101,7 +101,7 @@ class Purchase(models.Model):
         return self.cart.total
 
     @property 
-    def amount_to_pay(self):
+    def amount(self):
         return self.cart_price - self.discount_amount
     
     @property

@@ -179,7 +179,8 @@ def create_payment_view(request, payment_id):
     data = serializer.data
     vendor_name = data['payment_vendor']
 
-    data['transaction_amount'] = purchase.amount_to_pay
+    data['transaction_amount'] = payment.amount_to_pay
+    
     data.pop('payment_vendor')
 
     if vendor_name == PAYMENT_VENDOR_MP:
