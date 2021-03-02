@@ -40,18 +40,6 @@ class ProductTestCase(TestCase):
                 unitary_price=-1
             )
 
-    def test_product_list_includes_last_review(self):
-        review = G(ProductReview, author_name='diego', commentary='todo ok')
-        product_without_review = G(Product, description='Panchos')
-        product_with_review = review.product
-        c = Client()
-        url = reverse('product-list')
-        response = c.get(url)
-        assert response.status_code == 200
-        assert response.json()['results'][0]['last_review']['commentary'] \
-            == 'todo ok'
-        assert response.json()['results'][1]['last_review'] == None
-
     def test_product_includes_last_review(self):
         review = G(ProductReview, author_name='diego', commentary='todo ok')
         product = review.product
