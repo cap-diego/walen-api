@@ -32,3 +32,16 @@ def capture_payments(purchase):
         if ok:
             payment_i.set_status_captured()
         
+
+def check_if_shipment_staus_should_be_pending(sender, **kwargs):
+    
+    payment = kwargs['instance']
+    
+    if payment.is_captured:
+        shipment = payment.individual_purchase.shipment
+        shipment.set_status_pending()
+
+
+    if payment.is_reserved:
+        shipment = payment.individual_purchase.shipment
+        shipment.set_status_awaiting_purchase_completition()

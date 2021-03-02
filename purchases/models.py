@@ -13,7 +13,9 @@ from purchases.constants import PURCHASE_STATUS_CHOICES, \
     SHIPMENT_STATUS_AWAITING_PAYMENT, \
     PAYMENT_VENDOR_CHOICES, PAYMENT_STATUS_RESERVED, \
     PAYMENT_STATUS_FAILED, PURCHASE_STATUS_AWAITING_PEERS, \
-    PURCHASE_STATUS_COMPLETED, PAYMENT_STATUS_CAPTURED
+    PURCHASE_STATUS_COMPLETED, PAYMENT_STATUS_CAPTURED, \
+    SHIPMENT_STATUS_PENDING, \
+    SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION
 
 from carts.models import Cart 
 from users.models import Address
@@ -194,6 +196,21 @@ class Shipment(models.Model):
     shipment_address = models.ForeignKey(to=Address,
                                             on_delete=models.CASCADE,
                                             related_name='shipments')
+    def set_status_pending(self):
+        self.status = SHIPMENT_STATUS_PENDING
+        self.save()
+    
+    def set_status_awaiting_purchase_completition(self):
+        self.status = SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION
+        self.save()
+
+    @property
+    def is_pending(self):
+        return self.status == SHIPMENT_STATUS_PENDING
+
+    @property
+    def is_awaiting_purchase_completition(self):
+        return self.status == SHIPMENT_STATUS_AWAITING_PURCHASE_COMPLETITION
 
 def create_payment():
     return Payment.objects.create()

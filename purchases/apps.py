@@ -15,3 +15,7 @@ class PurchasesConfig(AppConfig):
         post_save.connect(signals.check_if_purchase_finished, \
                 sender='purchases.Purchase', \
                 dispatch_uid=uuid.uuid4())
+
+        post_save.connect(signals.check_if_shipment_staus_should_be_pending, \
+                sender='purchases.Payment', \
+                dispatch_uid=uuid.uuid4())

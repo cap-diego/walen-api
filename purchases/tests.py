@@ -464,11 +464,6 @@ class PurchasePaymentsAPIIntegrationTestCase(TestCase):
         payment.refresh_from_db()
         assert payment.is_captured
 
-    
-    def test_payment_captured_status_triggers_shipment_dispatched(self):
-        pass
-
-
 class PurchaseSignalTestCase(TestCase):
 
     @patch('purchases.signals.check_if_purchase_finished')
@@ -479,3 +474,24 @@ class PurchaseSignalTestCase(TestCase):
         purchase.refresh_from_db()
         assert purchase.is_completed
     
+    def test_payment_reserved_status_triggers_shipment_awaiting_purch_comp(self):
+        purchase = G(Purchase, clients_target=1)
+        individual = G(IndividualPurchase, purchase=purchase)
+        payment = individual.payment
+        payment.set_status_reserved()
+        
+        shipment = individual.shipment
+
+        assert shipment.is_awaiting_purchase_completition   
+
+
+    def test_payment_captured_status_triggers_shipment_pending(self):
+        purchase = G(Purchase, clients_target=1)
+        individual = G(IndividualPurchase, purchase=purchase)
+        payment = individual.payment
+
+        payment.set_status_captured()
+        
+        shipment = individual.shipment
+
+        assert shipment.is_pending   
