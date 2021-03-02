@@ -44,6 +44,14 @@ class IndividualPurchasePOSTSerializer(serializers.Serializer):
 class PaymentSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source='get_status_display')
     individual_purchase_id = serializers.ReadOnlyField()
+    amount_to_pay = serializers.ReadOnlyField()
+    coupon = serializers.SerializerMethodField(method_name='get_coupon_display')
+
+    def get_coupon_display(self, obj):
+        if obj.coupon:
+            return '{}'.format(obj.coupon)
+        return 'sin coupon'
+
     class Meta:
         model = Payment
         fields = '__all__'

@@ -15,7 +15,8 @@ from unittest.mock import patch, MagicMock
 from ddf import G
 
 # From w 
-from purchases.models import Purchase, IndividualPurchase, Payment
+from purchases.models import Purchase, IndividualPurchase, \
+    Payment, Coupon
 from carts.models import Cart
 from users.models import Address, Client as Cliente
 from products.models import Product
@@ -646,3 +647,54 @@ class PurchaseNotificationEmailTestCase(TestCase):
             subject_enviados = mail.outbox[i].subject + " "
 
         assert subject in subject_enviados
+
+
+class PaymentCouponTestcase(TestCase):
+    
+    def test_payment_with_coupon_has_discount(self):
+        
+        product = G(Product, unitary_price=50)
+        cart = G(Cart)
+        cart.add(prod_id=product.id, qt=1)
+        purchase = G(Purchase, clients_target = 1, \
+            cart=cart) 
+
+        ind_purchase = G(IndividualPurchase, 
+            purchase=purchase)
+
+        payment = ind_purchase.payment
+        
+        assert payment.amount_to_pay == purchase.amount
+        
+        coupon = G(Coupon, discount_percent=10)
+
+        payment.add_coupon(coupon)
+
+        assert payment.amount_to_pay == 45
+
+
+class PaymentCouponAPITestCase(TestCase):
+
+    def test_can_add_to_payment(self):
+        c = Client()
+        payment = G(Payment)
+
+        url = reverse('payment-coupon', args=[payment.id])
+        coupon = G(Coupon)
+        body = {'coupon_id': '{}'.format(coupon.id)}
+        response = c.put(url, json.dumps(body), content_type='application/json')
+
+        assert response.status_code == 200
+
+        payment.refresh_from_db()
+        assert payment.has_coupon
+
+        def test_cant_add_to_payment_if_coupon_is_inv(self):
+            c = Client()
+            import uuid
+            payment = G(Payment)
+            body = {'coupon_id': '1212'}
+            url = reverse('payment-coupon', args=[payment.id])
+            response = c.put(url, json.dumps(body), content_type='application/json')
+
+            assert response.status_code == 404

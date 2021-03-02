@@ -1,6 +1,8 @@
 # From django 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, \
+    MaxValueValidator
 
 # Utils 
 import uuid
@@ -125,6 +127,10 @@ class Purchase(models.Model):
     def is_cancelled(self):
         return self.status == PURCHASE_STATUS_CANCELLED
 
+    @property
+    def amount(self):
+        return self.cart_price - self.discount_amount
+
 class IndividualPurchase(models.Model):
 
     id = models.UUIDField(primary_key=True, \
@@ -167,6 +173,10 @@ class Payment(models.Model):
                                     blank=True,
                                     max_length=15)
 
+    coupon = models.ForeignKey('purchases.Coupon',
+                                null=True,
+                                on_delete=models.SET_NULL)
+
     def save_vendor_info(self, vendor_id, vendor_name):
         self.vendor_payment_id = vendor_id
         self.vendor_name = vendor_name
@@ -184,6 +194,10 @@ class Payment(models.Model):
         self.status = PAYMENT_STATUS_CAPTURED
         self.save()
 
+    def add_coupon(self, coupon):
+        self.coupon = coupon
+        self.save()
+
     @property
     def is_reserved(self):
         return self.status == PAYMENT_STATUS_RESERVED
@@ -199,6 +213,19 @@ class Payment(models.Model):
     @property
     def individual_purchase_id(self):
         return self.individual_purchase.id
+
+    @property
+    def amount_to_pay(self):
+        purchase = self.individual_purchase.purchase
+        if self.has_coupon: 
+            discount = purchase.amount * (self.coupon.discount_percent/100)
+            return purchase.amount - discount
+        return purchase.amount 
+
+    @property
+    def has_coupon(self):
+        return self.coupon
+
 
 class Shipment(models.Model):
 
@@ -305,3 +332,19 @@ def get_or_create_addr(addr):
         return None, 'error creating Address:  [{}]'.format(err)
 
     return addr, ''
+
+
+class Coupon(models.Model):
+
+    id = models.UUIDField(primary_key=True, \
+        default=uuid.uuid4, editable=False, \
+        verbose_name='Coupon id' )
+
+    discount_percent = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0, 'error, el porcentaje no puede ser inferior a 0'), \
+            MaxValueValidator(99, 'error, el porcentaje no puede superar 99')]
+    )
+
+    def __str__(self):
+        return 'Cupon de {}% de descuento'.format(self.discount_percent)
+    

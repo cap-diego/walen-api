@@ -5,7 +5,8 @@ from django.urls import path
 from purchases.views import create_purchase_view, \
     get_purchase_view, create_individual_purchase_view, \
     list_individual_purchase_view, detail_payment_view, \
-    detail_shipment_view, create_payment_view, cancel_puchase_view
+    detail_shipment_view, create_payment_view, cancel_puchase_view, \
+    payment_add_coupon_view
 
 urlpatterns = [
     path('',  create_purchase_view, name='purchase-list'),
@@ -36,4 +37,8 @@ urlpatterns = [
     path('<uuid:purchase_id>/cancel',
         cancel_puchase_view,
         name='purchase-cancel'),
+
+    path('payments/<uuid:payment_id>/coupon',
+        payment_add_coupon_view,
+        name='payment-coupon'),
 ]

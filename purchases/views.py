@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 # From w
 from purchases.models import Purchase, IndividualPurchase, \
     create_shipment, create_payment, create_individual_purchase, \
-        get_or_create_addr, Payment, Shipment
+        get_or_create_addr, Payment, Shipment, Coupon
 from ecommerceapp import time
 from purchases.serializers import PurchaseGETSerializer, \
     PurchasePOSTSerializer, IndividualPurchasePOSTSerializer, \
@@ -212,3 +212,18 @@ def cancel_puchase_view(request, purchase_id):
         return Response('{}'.format(err), status=status.HTTP_400_BAD_REQUEST)
 
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['PUT'])
+@permission_classes([])
+def payment_add_coupon_view(request, payment_id):
+    payment = get_object_or_404(Payment, pk=payment_id)
+    coupon_id = request.data.get('coupon_id', None)
+    
+    if not coupon_id:
+        return Response('error, coupon id', status=status.HTTP_400_BAD_REQUEST)
+    
+    coupon = get_object_or_404(Coupon, pk=coupon_id)
+
+    payment.add_coupon(coupon)
+
+    return Response(status=status.HTTP_200_OK)

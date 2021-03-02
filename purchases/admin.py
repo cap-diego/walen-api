@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from purchases.models import Shipment
+from purchases.models import Shipment, Coupon
 from purchases.constants import SHIPMENT_STATUS_DELIVERED, \
     SHIPMENT_STATUS_DISPATCHED
 
@@ -16,6 +16,10 @@ set_dispatched.short_description = 'Actualizar como en camino'
 
 class ShipmentAdmin(admin.ModelAdmin):
     actions = [set_delivered, set_dispatched]
-    
+
+class CouponAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(Shipment, ShipmentAdmin)
+admin.site.register(Coupon, CouponAdmin)
 admin.site.disable_action('delete_selected')
