@@ -1,6 +1,7 @@
 # From django 
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 # From drf 
 from rest_framework import status
@@ -201,7 +202,9 @@ def create_payment_view(request, payment_id):
 def cancel_puchase_view(request, purchase_id):
     
     purchase = get_object_or_404(Purchase, pk=purchase_id)
-
-    purchase.set_status_cancelled()
+    try:
+        purchase.set_status_cancelled()
+    except DjangoValidationError as err:
+        return Response('{}'.format(err), status=status.HTTP_400_BAD_REQUEST)
 
     return Response(status=status.HTTP_204_NO_CONTENT)

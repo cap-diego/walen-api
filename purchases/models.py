@@ -81,6 +81,8 @@ class Purchase(models.Model):
         self.save()      
 
     def set_status_cancelled(self):
+        if self.is_completed:
+            raise ValidationError('error, completed purchase cant be cancelled')
         self.status = PURCHASE_STATUS_CANCELLED
         self.save()  
 

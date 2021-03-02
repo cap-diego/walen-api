@@ -83,6 +83,15 @@ class PurchaseTestCase(TestCase):
         expected_discount = (purchase.clients_target - 1) * 0.1 * cart.total
         assert purchase.amount_to_pay == 50 - expected_discount 
         assert expected_discount == purchase.discount_amount
+    
+    def test_no_se_puede_cancelar_purchase_completed(self):
+        purchase = G(Purchase)
+
+        purchase.set_status_completed()
+
+        with self.assertRaises(ValidationError):
+            purchase.set_status_cancelled()
+
 
 class PurchaseCartAPIIntegrationTest(TestCase):
 
@@ -176,6 +185,18 @@ class PurchaseCartAPIIntegrationTest(TestCase):
         url = reverse('purchase-list')
         response = c.post(url, json.dumps(body), content_type='application/json')
         assert response.status_code == 201
+
+    def test_cant_cancel_purchase_completed(self):
+        c = Client()
+        purchase = G(Purchase)
+
+        purchase.set_status_completed()
+
+        url = reverse('purchase-cancel', args=[purchase.id])
+
+        response = c.put(url)
+        assert response.status_code == 400
+        assert 'error, completed purchase cant be cancelled' in response.json()
 
 class IndividualPurchaseTest(TestCase):
 
