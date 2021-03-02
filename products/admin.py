@@ -7,7 +7,7 @@ from products.models import Product, ProductTag,\
 
 
 class ProductAdmin(admin.ModelAdmin):
-    pass
+    ordering = ['current_stock']
 
 class ProductTagAdmin(admin.ModelAdmin):
     pass
