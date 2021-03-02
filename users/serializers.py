@@ -8,7 +8,7 @@ from rest_framework.exceptions import APIException
 
 # From w
 from users.models import Address, AddressGeoCodingResult, \
-    Client
+    Client, create_address
 
 User = get_user_model()
 
@@ -33,31 +33,11 @@ class AddressSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        geocoding_data = validated_data.pop('geocoding', None)
-        addr_data = validated_data
-        geocoding = None
-        if geocoding_data:
-            geocoding = self.create_geocoding_result(geocoding_data)
-        addr = self.create_address(addr_data, geocoding)
+        addr, err = create_address(validated_data)
+        if err:
+            raise APIException(err)
         return addr
 
-    def create_geocoding_result(self, data):
-        try:
-            return AddressGeoCodingResult.objects.create(
-                **data
-            )
-        except Exception as err:
-            raise APIException(err)
-
-
-    def create_address(self, data, geo=None):
-        try:
-            return Address.objects.create(
-                geocoding=geo,
-                **data
-            )
-        except Exception as err:
-            raise APIException(err)
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:

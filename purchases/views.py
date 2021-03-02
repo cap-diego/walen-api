@@ -20,7 +20,7 @@ from purchases.serializers import PurchaseGETSerializer, \
             ShipmentSerializer, PaymentPUTSerializer
 
 from users.models import Client, get_or_create_client, \
-    get_or_create_address
+    create_address
 
 from purchases.constants import PAYMENT_VENDOR_MP, \
     PURCHASE_STATUS_CANCELLED
@@ -121,11 +121,15 @@ def create_individual_purchase_view(request, purchase_id):
         return Response(error_msg, status=status.HTTP_400_BAD_REQUEST)
 
     client = get_or_create_client(serializer.data['client_email'])
-    addr = get_or_create_address(serializer_data['shipment_address'])
+    addr, err = create_address(serializer_data['shipment_address'])
+    
+    if err:
+        return Response('error al crear address: {}'.format(err), status=status.HTTP_400_BAD_REQUEST)        
+
     individual, err = create_individual_purchase(purchase, client, addr)
         
     if err:
-        return Response('{}'.format(err), status=status.HTTP_400_BAD_REQUEST)
+        return Response('error al crear individual: {}'.format(err), status=status.HTTP_400_BAD_REQUEST)
 
     serializer = IndividualPurchaseGETSerializer(individual)
 
