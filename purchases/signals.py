@@ -16,7 +16,7 @@ def update_purchase_related_models_status(sender, **kwargs):
         return
 
     if purchase.is_completed:
-        capture_payments(purchase)
+        capture_payments_purchase(purchase)
         check_if_notify_clients(purchase)
         return
 
@@ -49,27 +49,29 @@ def send_email_client(client, subject):
             format(client.emal))
 
 
-def capture_payments(purchase):
+def capture_payments_purchase(purchase):
     """
         Captura los Payments de la Completed Purchase que aun
         no han sido capturados
     """
-
     individuals = purchase.individuals_purchases
     individuals_sin_capturar = individuals.exclude(
                 payment__status=PAYMENT_STATUS_CAPTURED)
     
     for individual in individuals_sin_capturar:
         payment_i = individual.payment
-        res, ok = mercadopago.MercadoPagoPaymentService.capture(
-            purch_id=payment_i.vendor_payment_id,
-        )
-
-        if ok:
-            payment_i.set_status_captured()
-        else:
+        res, ok = capture_payment(payment_i)
+        if not ok:
             logger.error('no fue posible capturar el pago de la purchase {}: {}'.
                 format(purchase.id, res))
+
+def capture_payment(payment):
+    res, ok = mercadopago.MercadoPagoPaymentService.capture(
+        purch_id=payment.vendor_payment_id,
+    )
+    if ok:
+        payment.set_status_captured()
+    return (res, ok)
 
 def update_shipment_status(sender, **kwargs):
     """
