@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
 
 # From w 
 from products.models import Product, Category 
@@ -19,6 +20,19 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     serializer_class = ProductSerializer
     permission_classes = []
+
+    def update(self, request, pk=None):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def partial_update(self, request, pk=None):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def destroy(self, request, pk=None):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action == 'list':
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
 
     @action(detail=True, methods=['GET'])
     def reviews(self, request, pk=None):
@@ -47,3 +61,17 @@ class ProductViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = []
+    
+    def update(self, request, pk=None):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def partial_update(self, request, pk=None):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def destroy(self, request, pk=None):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action == 'list':
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]

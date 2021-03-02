@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response 
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAdminUser
 
 # From w 
 from carts.models import Cart 
@@ -19,6 +20,19 @@ class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.prefetch_related('products')
     serializer_class = CartSerializer
     permission_classes = []
+
+    def update(self, request, pk=None):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def partial_update(self, request, pk=None):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def destroy(self, request, pk=None):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action == 'list':
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
 
     @action(detail=True, methods=['POST'])
     @transaction.atomic
