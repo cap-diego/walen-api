@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError
 
 FAILED_STATUS = 'rejected'
 RESERVED_STATUS = 'authorized'
-CAPTURED_STATUS = 'captured'
+CAPTURED_STATUS = 'approved'
 
 class MercadoPagoPaymentService:
     headers = { 'Authorization': 'Bearer {}'
@@ -60,7 +60,7 @@ class MercadoPagoPaymentService:
 
     @classmethod
     def parse_response(cls, response, expected_status):
-        if response.status_code != 201: 
+        if response.status_code not in [201, 200]: 
             error_msg = '{}'.format(response.json().get('message', ''))
             return error_msg, False
         else:
