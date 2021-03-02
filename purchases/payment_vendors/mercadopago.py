@@ -41,7 +41,6 @@ class MercadoPagoPaymentService:
     @classmethod
     def capture(cls, purch_id):
         error_msg = ''
-        breakpoint()
         data = {
             'capture': True
         }
