@@ -80,6 +80,10 @@ class Payment(models.Model):
     @property
     def has_coupon(self):
         return self.coupon
+    
+    @property
+    def is_cancelled(self):
+        return self.status == PAYMENT_STATUS_CANCELLED
 
 
 def create_payment():

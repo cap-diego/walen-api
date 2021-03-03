@@ -13,7 +13,7 @@ def update_purchase_related_models_status(sender, **kwargs):
     purchase = kwargs['instance']
 
     if purchase.is_cancelled:
-        abort_shipments(purchase)
+        cancel_payments(purchase)
         return
 
     if purchase.is_completed:
@@ -69,6 +69,7 @@ def cancel_payment(payment):
     )
     if ok:
         payment.set_status_cancelled()
+        send_email_client_payment_cancelled(payment.individual_purchase.client, payment.individual_purchase, 'Compra cancelada')
     return (res, ok)    
 
 def update_shipment_status(sender, **kwargs):
@@ -86,13 +87,17 @@ def update_shipment_status(sender, **kwargs):
         shipment = payment.individual_purchase.shipment
         shipment.set_status_awaiting_purchase_completition()
 
+    if payment.is_cancelled:
+        shipment = payment.individual_purchase.shipment
+        shipment.set_status_aborted()        
 
-def abort_shipments(purchase):
+
+def cancel_payments(purchase):
     
     individuals = purchase.individuals_purchases
 
     for individual in individuals.all():
-        individual.shipment.set_status_aborted()
+        cancel_payment(individual.payment)
 
 
 def shipment_status_notify_client(sender, **kwargs):
@@ -140,6 +145,23 @@ def send_email_client_payment_captured(client, individual, subject, message=''):
         'status': 'Preparandose'
     }    
     sent = send_email_purchase('Pago realizado', client.email, data_ctx)
+    if sent == 0:
+        logger.error('no fue posible enviar el mail a {}'.\
+            format(client.emal))
+
+
+
+def send_email_client_payment_cancelled(client, individual, subject, message=''):
+    shipment = individual.shipment
+    link = '{}{}'.format(settings.BASE_URL_PAGE_SHIPMENT_STATUS, shipment.id)
+    data_ctx = {
+        'client_firstname': client.first_name,
+        'client_lasttname': client.last_name,
+        'link': link,
+        'address': individual.shipment,
+        'status': 'Cancelado'
+    }    
+    sent = send_email_purchase(subject, client.email, data_ctx)
     if sent == 0:
         logger.error('no fue posible enviar el mail a {}'.\
             format(client.emal))
