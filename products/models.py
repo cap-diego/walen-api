@@ -13,7 +13,6 @@ class Category(models.Model):
     
     class Meta:
         ordering = ['description']
-        
     def __str__(self):
        return self.description
 
@@ -32,6 +31,9 @@ class Product(models.Model):
 
     class Meta:
         ordering = ['id']
+        indexes = [
+            models.Index(fields=['category'], name='category_idx'),
+        ]
 
     def __str__(self):
         return '{}  [stock: {}]'.format(self.display_name, self.current_stock)
