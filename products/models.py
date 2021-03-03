@@ -11,6 +11,9 @@ MIN_VALUE_ZERO_ERROR_MSG
 class Category(models.Model):
     description = models.CharField(max_length=50, unique=True)
     
+    class Meta:
+        ordering = ['description']
+        
     def __str__(self):
        return self.description
 

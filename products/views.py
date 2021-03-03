@@ -90,3 +90,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
+
+    @method_decorator(cache_page(ONE_HOUR))
+    def list(self, request):
+        return super().list(request)
