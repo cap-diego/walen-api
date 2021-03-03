@@ -12,7 +12,8 @@ from rest_framework.exceptions import ValidationError
 # From w
 from purchases.models import Purchase, IndividualPurchase, \
     create_shipment, create_payment, create_individual_purchase, \
-        get_or_create_addr, Payment, Shipment, Coupon, purchase_history
+    get_or_create_addr, Payment, Shipment, Coupon, purchase_history, \
+    purchase_recommendations    
 
 from ecommerceapp import time
 from purchases.serializers import PurchaseGETSerializer, \
@@ -31,7 +32,7 @@ from purchases.constants import PAYMENT_VENDOR_MP, \
     PURCHASE_STATUS_CANCELLED
 from purchases.payment_vendors import mercadopago
 from carts.models import CartProduct
-
+from products.serializers import ProductRecommendedSerializer
 
 PurchasesNoCancelled = \
     Purchase.objects.exclude(status=PURCHASE_STATUS_CANCELLED)
@@ -249,6 +250,7 @@ def coupons_list_view(request):
 
 @api_view(['GET'])
 @permission_classes([])
+@did_token_required
 @email_in_url_required
 def purchase_history_view(request, email):
     """
@@ -262,5 +264,17 @@ def purchase_history_view(request, email):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    
+@api_view(['GET'])
+@permission_classes([])
+@did_token_required
+@email_in_url_required
+def purchase_recommendations_view(request, email):
+
+    client = get_object_or_404(Client, email=email)
+
+    res = purchase_recommendations(client)
+    serializer = ProductRecommendedSerializer(res, many=True)
+    return Response(serializer.data)
+
+
 

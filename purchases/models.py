@@ -158,6 +158,9 @@ class IndividualPurchase(models.Model):
 
     class Meta:
         ordering = ['-creation_date']
+        indexes = [
+            models.Index(fields=['client'], name='client_idx'),
+        ]
 
 class Payment(models.Model):
     id = models.UUIDField(primary_key=True, \
@@ -374,5 +377,24 @@ def purchase_history(client, last=10):
         client=client
     )
     return qs[:last]
+
+def purchase_recommendations(client):
+    """
+        Recomendar los productos que resulten de:
+            comprados por personas que han participado en compras grupales con el usuario
+    """
+    lasts_groupal_purchases = Purchase.objects.filter(
+        clients_target__gt=1, #colaborativa
+        individuals_purchases__client=client, # participo cliente
+    )[:5]
+
+    products = []
+    for purchase in lasts_groupal_purchases.all():
+        if products == []:
+            products = purchase.cart.products.all() 
+        else:
+            products = products.union(purchase.cart.products.all())
+    
+    return products
 
 # Index para categorias de productos
