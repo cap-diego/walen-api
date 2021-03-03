@@ -43,8 +43,3 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = '__all__'
-
-class ClientProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Client
-        fields = ['email']

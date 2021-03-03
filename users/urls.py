@@ -2,7 +2,7 @@
 from django.urls import path
 
 # From w 
-from users.views import cliente_exists_view, create_cliente_view, \
+from users.views import cliente_exists_view, create_or_update_cliente_view, \
     cliente_profile_view
 
 urlpatterns = [
@@ -12,6 +12,6 @@ urlpatterns = [
     path('<str:email>', cliente_exists_view,
         name='cliente-exists'),
 
-    path('new/', create_cliente_view,
+    path('new/', create_or_update_cliente_view,
         name='cliente-create'),
 ]
