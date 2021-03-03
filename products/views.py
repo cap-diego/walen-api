@@ -6,6 +6,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
+from rest_framework import filters
+
+from django_filters.rest_framework import DjangoFilterBackend
 
 # From w 
 from products.models import Product, Category 
@@ -19,6 +22,10 @@ class ProductViewSet(viewsets.ModelViewSet):
             .prefetch_related('tags') 
 
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['tags', 'category']
+    search_fields = ['display_name', 'description', 'category__description',
+        'reviews__commentary']
     permission_classes = []
 
     def update(self, request, pk=None):

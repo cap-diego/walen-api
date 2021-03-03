@@ -10,3 +10,4 @@ django-cors-headers
 requests
 coverage
 newrelic
+django-filter
