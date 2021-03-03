@@ -26,9 +26,6 @@ class MagicLinkAuth:
             issuer = self.magic.Token.get_issuer(didtoken)
         except DIDTokenError as e:
             return False, 'didtoken invalid'
-        
-        if not email:
-            return True, None 
 
         coincide, err = self._email_coincide_with_token(didtoken, email)
         if not coincide:

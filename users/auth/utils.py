@@ -18,12 +18,21 @@ def did_token_required(f):
     def decorated_function(*args, **kwargs):
         request = args[0]
         email = request.data.get('email', None)
+        
+        if not email:
+            email = kwargs.get('email', None)
+        
+        if not email:
+            return Response('error, email expected', \
+                status=status.HTTP_400_BAD_REQUEST)
+        
         did_token = request.headers.get('Authorization', None)
+
         if did_token is None:
             error_message = 'error, expected token'
             return Response(error_message, \
                 status=status.HTTP_400_BAD_REQUEST)
-        
+
         magic = magiclink.MagicLinkAuth()
         valid, err = magic.didtoken_is_valid(did_token, email)
         if not valid:
