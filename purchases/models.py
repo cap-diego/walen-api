@@ -345,6 +345,10 @@ class Coupon(models.Model):
             MaxValueValidator(99, 'error, el porcentaje no puede superar 99')]
     )
 
+    valid_until = models.DateField()
+
     def __str__(self):
-        return 'Cupon de {}% de descuento'.format(self.discount_percent)
-    
+        return 'Cupon de {} de descuento'.format(self.discount_percent)
+
+    class Meta:
+        ordering = ['-valid_until']

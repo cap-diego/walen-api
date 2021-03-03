@@ -689,12 +689,24 @@ class PaymentCouponAPITestCase(TestCase):
         payment.refresh_from_db()
         assert payment.has_coupon
 
-        def test_cant_add_to_payment_if_coupon_is_inv(self):
-            c = Client()
-            import uuid
-            payment = G(Payment)
-            body = {'coupon_id': '1212'}
-            url = reverse('payment-coupon', args=[payment.id])
-            response = c.put(url, json.dumps(body), content_type='application/json')
 
-            assert response.status_code == 404
+class CouponAPITestCase(TestCase):
+
+    def test_coupon_vencido_no_se_lista(self):
+        c = Client()
+        
+        from ecommerceapp.time import APIClock
+        from datetime import timedelta
+        tomorrow = APIClock.now() + timedelta(days=1)
+        yesterday = APIClock.now() - timedelta(days=1)
+        coupon_no_vencido = G(Coupon, valid_until=tomorrow)
+        coupon_vencido = G(Coupon, valid_until=yesterday)
+
+        url = reverse('coupon-list')
+
+        response = c.get(url)
+
+        assert response.status_code == 200
+
+        assert len(response.json()) == 1
+        assert response.json()[0]['id'] == str(coupon_no_vencido.id)

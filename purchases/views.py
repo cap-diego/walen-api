@@ -17,7 +17,7 @@ from ecommerceapp import time
 from purchases.serializers import PurchaseGETSerializer, \
     PurchasePOSTSerializer, IndividualPurchasePOSTSerializer, \
         IndividualPurchaseGETSerializer, PaymentSerializer, \
-            ShipmentSerializer, PaymentPUTSerializer
+        ShipmentSerializer, PaymentPUTSerializer, CouponSerializer
 
 from users.models import Client, get_or_create_client, \
     create_address
@@ -180,7 +180,7 @@ def create_payment_view(request, payment_id):
     vendor_name = data['payment_vendor']
 
     data['transaction_amount'] = payment.amount_to_pay
-    
+
     data.pop('payment_vendor')
 
     if vendor_name == PAYMENT_VENDOR_MP:
@@ -228,3 +228,17 @@ def payment_add_coupon_view(request, payment_id):
     payment.add_coupon(coupon)
 
     return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([])
+def coupons_list_view(request):
+    
+    now = time.APIClock.now()
+
+    coupons = Coupon.objects.filter(valid_until__gte=now)
+    serializer = CouponSerializer(coupons, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+    
+

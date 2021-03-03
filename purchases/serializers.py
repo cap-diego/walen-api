@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 # From w
 from purchases.models import Purchase, IndividualPurchase, \
-    Shipment, Payment
+    Shipment, Payment, Coupon
 from users.serializers import AddressSerializer, \
     ClientSerializer
 from carts.models import Cart
@@ -79,3 +79,9 @@ class PaymentPUTSerializer(serializers.Serializer):
     installments = serializers.IntegerField(min_value=1, max_value=24)
     payer_email = serializers.EmailField()
     payment_vendor = serializers.ChoiceField(choices=PAYMENT_VENDOR_CHOICES)
+
+
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = '__all__'
