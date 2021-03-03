@@ -21,7 +21,7 @@ User = get_user_model()
 @api_view(['POST'])
 @permission_classes([])
 @did_token_required
-def create_user_view(request):
+def create_cliente_view(request):
     data, err = parse_req_body_to_user_data(request.data)
     if err:
         return Response('error parsing body: {}'.format(err), \
@@ -40,9 +40,9 @@ def create_user_view(request):
 @api_view(['GET'])
 @permission_classes([])
 @email_in_url_required
-def user_exists_view(request, email):
-    users = User.objects.filter(email=email)
-    if not users.exists():
+def cliente_exists_view(request, email):
+    cliente = Client.objects.filter(email=email)
+    if not cliente.exists():
         return Response({'description': 'email not registered'}, status=status.HTTP_404_NOT_FOUND)
     return Response({'description': 'ok'})
 
@@ -68,7 +68,7 @@ def email_is_valid(email):
 @permission_classes([])
 @did_token_required
 @email_in_url_required
-def user_profile_view(request, email):
+def cliente_profile_view(request, email):
     client = get_object_or_404(Client, email=email)
     serializer = ClientProfileSerializer(client)
     return Response(serializer.data, status=status.HTTP_200_OK)

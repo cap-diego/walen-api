@@ -21,22 +21,21 @@ User = get_user_model()
 class UsersTestCase(TestCase):
 
     @patch('users.auth.magiclink.MagicLinkAuth')
-    def test_crear_usuario_con_token_valido(self, mock):
+    def test_crear_cliente_con_token_valido(self, mock):
         _mock = MagicMock()
         _mock.didtoken_is_valid = MagicMock(return_value = (True, ''))
         mock.return_value = _mock
         c = ClientReq()
         data = {'email': 'Juancito@gmail.com'}
-        url = reverse('user-create')
+        url = reverse('cliente-create')
         response = c.post(url, data, HTTP_AUTHORIZATION='un token')
         assert response.status_code == 201
-        assert response.json()['email'] == response.json()['user']['username']
         assert response.json()['email'] == data['email']
 
     def test_error_si_no_se_envia_token(self):
         c = ClientReq()
         data = {'email': 'Juancito@gmail.com'}
-        url = reverse('user-create')
+        url = reverse('cliente-create')
         response = c.post(url, data)
         assert response.status_code == 400
         assert response.json() == 'error, expected token'
@@ -49,7 +48,7 @@ class UsersTestCase(TestCase):
         mock.return_value = _mock
         c = ClientReq()
         data = {'email': 'Juancito@gmail.com'}
-        url = reverse('user-create')
+        url = reverse('cliente-create')
         response = c.post(url, data, HTTP_AUTHORIZATION='un token')
         assert response.status_code == 400
         assert response.json() == reason_invalid
@@ -62,7 +61,7 @@ class UsersTestCase(TestCase):
         c = ClientReq()
         data = {'email': 'Juancito@gmail.com'}
         self.crear_cliente(c, data)
-        url = reverse('user-create')
+        url = reverse('cliente-create')
         response = c.post(url, data, HTTP_AUTHORIZATION='un token')
         assert response.status_code == 400
         assert response.json() == 'error, {} already registered'.format(data['email'])
@@ -72,7 +71,7 @@ class UsersTestCase(TestCase):
         assert response.status_code == 201
 
     @patch('users.auth.magiclink.MagicLinkAuth')
-    def test_usuario_existe_por_mail(self, mock):
+    def test_cliente_existe_por_mail(self, mock):
         c = ClientReq()
         _mock = MagicMock()
         reason_invalid = 'token es invalido'
@@ -81,13 +80,13 @@ class UsersTestCase(TestCase):
         
         data = {'email': 'Juancito@gmail.com'}
         self.crear_cliente(c, data)
-        url = reverse('user-exists', args=[data['email']])
+        url = reverse('cliente-exists', args=[data['email']])
         response = c.get(url)
         assert response.status_code == 200
 
-    def test_usuario_no_existe_por_mail(self):
+    def test_cliente_no_existe_por_mail(self):
         c = ClientReq()
         email = 'Juancito@gmail.com'
-        url = reverse('user-exists', args=[email])
+        url = reverse('cliente-exists', args=[email])
         response = c.get(url)
         assert response.status_code == 404

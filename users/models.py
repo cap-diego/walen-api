@@ -9,10 +9,6 @@ class User(AbstractUser):
 
 class Client(models.Model):
 
-    user = models.OneToOneField(to='users.User', \
-                                on_delete=models.SET_NULL,
-                                null=True
-                                )   
     email = models.EmailField(unique=True)
 
 class Address(models.Model):
@@ -75,12 +71,10 @@ def get_or_create_client(email):
     client, _ = Client.objects.get_or_create(email=email)
     return client
 
-@transaction.atomic
 def create_client(data):
     email = data['email']
     clients = Client.objects.filter(email=email)
     if clients.exists():
         return None, 'error, {} already registered'.format(email)
-    user = User.objects.create(**data)
-    client = Client.objects.create(email=email, user=user)
+    client = Client.objects.create(email=email)
     return client, ''
