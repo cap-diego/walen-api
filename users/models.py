@@ -11,6 +11,13 @@ class Client(models.Model):
 
     email = models.EmailField(unique=True)
 
+    first_name = models.CharField(blank=True, max_length=20)
+
+    last_name = models.CharField(blank=True, max_length=20)
+
+    avatar_url = models.URLField(blank=True)
+    
+
 class Address(models.Model):
     commentary = models.CharField(max_length=255, blank=True)
     postal_code = models.CharField(max_length=10, blank=True)
