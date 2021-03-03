@@ -55,7 +55,7 @@ class UsersTestCase(TestCase):
         assert response.json() == reason_invalid
 
     @patch('users.auth.magiclink.MagicLinkAuth')
-    def test_si_ya_existe_el_cliente_lo_actualiza_con_put_y_falla_con_post(self, mock):
+    def test_si_ya_existe_el_cliente_falla(self, mock):
         _mock = MagicMock()
         _mock.didtoken_is_valid = MagicMock(return_value = (True, ''))
         mock.return_value = _mock
@@ -64,16 +64,26 @@ class UsersTestCase(TestCase):
         self.crear_cliente(c, data)
 
         url = reverse('cliente-create')
-        data['first_name'] = 'pedro'
-        data['last_name'] = 'masivo'
         response = c.post(url, json.dumps(data), content_type='application/json' , HTTP_AUTHORIZATION='un token')
         assert response.status_code == 400
-        assert response.json() == 'error, {} already registered'.format(data['email'])
 
+    @patch('users.auth.magiclink.MagicLinkAuth')
+    def test_se_puede_actualizar_cliente(self, mock):
+        _mock = MagicMock()
+        _mock.didtoken_is_valid = MagicMock(return_value = (True, ''))
+        mock.return_value = _mock
+        c = ClientReq()
+        data = {'email': 'Juancito@gmail.com', 'first_name':'juan'}
+        self.crear_cliente(c, data)
+
+        url = reverse('cliente-profile', args=[data['email']])
+        data['first_name'] = 'pedro'
+        data['last_name'] = 'masivo'
         response = c.put(url, json.dumps(data), content_type='application/json' , HTTP_AUTHORIZATION='un token')
-        assert response.status_code == 201
+        assert response.status_code == 200
         assert response.json()['first_name'] == 'pedro'
         assert response.json()['last_name'] == 'masivo'
+
 
     def crear_cliente(self, c, data):
         response = c.post('/api/v1/users/new/', json.dumps(data), content_type='application/json', HTTP_AUTHORIZATION='un token')

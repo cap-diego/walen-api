@@ -17,26 +17,12 @@ from users.models import Client, create_client
 User = get_user_model()
 
 
-@api_view(['POST', 'PUT'])
+@api_view(['POST'])
 @permission_classes([])
 @did_token_required
 def create_or_update_cliente_view(request):
-    email = request.data.get('email', None)
-    if not email:
-        return Response('error parsing body: email expected', \
-            status=status.HTTP_400_BAD_REQUEST)
-    
-    clients_filtered = Client.objects.filter(email=email)
-    
-    if clients_filtered.exists():
-        if request.method.upper() == 'POST':
-            return Response('error, {} already registered'.format(email), \
-                status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = ClientSerializer(clients_filtered.first(), \
-                 data=request.data)
-    else:
-        serializer = ClientSerializer(data=request.data)
+   
+    serializer = ClientSerializer(data=request.data)
     
     ok = serializer.is_valid()
     
@@ -61,12 +47,25 @@ def cliente_exists_view(request, email):
         return Response({'description': 'email not registered'}, status=status.HTTP_404_NOT_FOUND)
     return Response({'description': 'ok'})
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT'])
 @permission_classes([])
 @did_token_required
 @email_in_url_required
 def cliente_profile_view(request, email):
     client = get_object_or_404(Client, email=email)
-    serializer = ClientSerializer(client)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+
+    if request.method.upper() == 'GET':
+        serializer = ClientSerializer(client)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        serializer = ClientSerializer(client, data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
 
