@@ -11,6 +11,7 @@ from requests.exceptions import ConnectionError
 FAILED_STATUS = 'rejected'
 RESERVED_STATUS = 'authorized'
 CAPTURED_STATUS = 'approved'
+CANCELLED_STATUS = 'cancelled'
 
 class MercadoPagoPaymentService:
     headers = { 'Authorization': 'Bearer {}'
@@ -56,6 +57,26 @@ class MercadoPagoPaymentService:
             return '{}'.format(err), False
         
         return cls.parse_response(response=response, expected_status=CAPTURED_STATUS)
+
+    @classmethod
+    def cancel(cls, purch_id):
+        data = {
+            'status': CANCELLED_STATUS
+        }
+
+        url = '{}{}'.format(settings.MERCADO_PAGO_BASE_URL, purch_id)
+        
+        try:
+            response = requests.put(url, \
+                    json=data, \
+                    headers=cls.headers, \
+                    timeout=settings.MERCADO_PAGO_TIMEOUT)
+        except Timeout:
+            return 'error timeout', False
+        except ConnectionError as err:
+            return '{}'.format(err), False
+        
+        return cls.parse_response(response=response, expected_status=CANCELLED_STATUS)
 
 
     @classmethod

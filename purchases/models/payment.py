@@ -7,7 +7,7 @@ import uuid
 
 from purchases.constants import PAYMENT_STATUS_CAPTURED, PAYMENT_STATUS_PENDING, \
     PAYMENT_STATUS_RESERVED, PAYMENT_STATUS_FAILED, PAYMENT_VENDOR_CHOICES, \
-    PAYMENT_STATUS_CHOICES
+    PAYMENT_STATUS_CHOICES, PAYMENT_STATUS_CANCELLED
 
 class Payment(models.Model):
     id = models.UUIDField(primary_key=True, \
@@ -43,6 +43,10 @@ class Payment(models.Model):
     
     def set_status_captured(self):
         self.status = PAYMENT_STATUS_CAPTURED
+        self.save()
+
+    def set_status_cancelled(self):
+        self.status = PAYMENT_STATUS_CANCELLED
         self.save()
 
     def add_coupon(self, coupon):

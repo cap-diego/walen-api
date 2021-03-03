@@ -15,12 +15,14 @@ PAYMENT_STATUS_PENDING = 'pen'
 PAYMENT_STATUS_FAILED = 'fld'
 PAYMENT_STATUS_RESERVED = 'rsv'
 PAYMENT_STATUS_CAPTURED = 'cap'
+PAYMENT_STATUS_CANCELLED = 'can'
 
 PAYMENT_STATUS_CHOICES = (
     (PAYMENT_STATUS_PENDING, 'pending'),
     (PAYMENT_STATUS_FAILED, 'failed'),
     (PAYMENT_STATUS_RESERVED, 'reserved'),
-    (PAYMENT_STATUS_CAPTURED, 'captured')
+    (PAYMENT_STATUS_CAPTURED, 'captured'),
+    (PAYMENT_STATUS_CANCELLED, 'cancelled')
 )
 
 SHIPMENT_STATUS_AWAITING_PAYMENT = 'awp' # Estado inicial, todavia no se realizo reserva ni captura

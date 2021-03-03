@@ -63,6 +63,14 @@ def capture_payment(payment):
         payment.set_status_captured()
     return (res, ok)
 
+def cancel_payment(payment):
+    res, ok = mercadopago.MercadoPagoPaymentService.cancel(
+        purch_id=payment.vendor_payment_id,
+    )
+    if ok:
+        payment.set_status_cancelled()
+    return (res, ok)    
+
 def update_shipment_status(sender, **kwargs):
     """
         Actualiza el estado del envio segun el estado
