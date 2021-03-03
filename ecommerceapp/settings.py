@@ -110,6 +110,12 @@ else:
     POSTGRES_CONN_MAX_AGE = os.environ.get('POSTGRES_CONN_MAX_AGE', 20)
     DATABASES['default'] = dj_database_url.config(conn_max_age=POSTGRES_CONN_MAX_AGE, ssl_require=True)
 
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django_bmemcached.memcached.BMemcached',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

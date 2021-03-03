@@ -1,5 +1,7 @@
 # From django
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 # From drf 
 from rest_framework import viewsets, status
@@ -40,6 +42,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
+    
+    @method_decorator(cache_page(60*60*2))
+    def list(self, request):
+        return super().list(request)
 
     @action(detail=True, methods=['GET'])
     def reviews(self, request, pk=None):

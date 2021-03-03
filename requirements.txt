@@ -11,3 +11,5 @@ requests
 coverage
 newrelic
 django-filter
+python-binary-memcached
+django-bmemcached
