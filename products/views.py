@@ -17,6 +17,8 @@ from products.models import Product, Category
 from products.serializers import ProductSerializer, \
     CategorySerializer, ProductReviewSerializer, ProductReviewPOSTSerializer
 
+ONE_HOUR = 60*60
+
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects \
             .select_related('category') \
@@ -43,7 +45,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
     
-    @method_decorator(cache_page(60*60*2))
+    @method_decorator(cache_page(ONE_HOUR))
     def list(self, request):
         return super().list(request)
 
@@ -85,6 +87,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         permission_classes = []
-        if self.action == 'list':
+        if self.action == 'create':
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
