@@ -43,3 +43,4 @@ class Command(BaseCommand):
                 total_to_update, total_updated
             )
         ))
+        return
