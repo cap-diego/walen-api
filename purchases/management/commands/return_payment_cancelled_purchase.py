@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 ))
         
         self.stdout.write(self.style.SUCCESS(
-            'Resumen de corrida. Total para actualizar: {}, total actualizados: {}'.format(
+            'Resumen de corrida. Total para cancelar: {}, total cancelados: {}'.format(
                 total_to_update, total_updated
             )
         ))
