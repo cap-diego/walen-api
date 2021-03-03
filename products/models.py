@@ -31,7 +31,7 @@ class Product(models.Model):
         ordering = ['id']
 
     def __str__(self):
-        return self.display_name
+        return '{}  [stock: {}]'.format(self.display_name, self.current_stock)
     
     def clean(self):
         if self.unitary_price < 0:
@@ -42,15 +42,14 @@ class Product(models.Model):
         self.clean()
         return super().save()
 
-    def __str__(self):
-        return self.display_name
-    
-
 class ProductTag(models.Model):
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE, 
         related_name='tags')
     tag = models.CharField(max_length=20)
 
+    def __str__(self):
+        return self.tag
+    
 class ProductPhoto(models.Model):
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE, 
         related_name='photos')
