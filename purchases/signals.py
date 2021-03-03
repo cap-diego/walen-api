@@ -114,7 +114,7 @@ def shipment_status_notify_client(sender, **kwargs):
             'client_firstname': client.first_name,
             'client_lasttname': client.last_name,
             'link': link,
-            'address': individual.shipment,
+            'address': individual.shipment.human_readable_address,
             'status': 'Entregado'
         }
         send_email_purchase('Estado compra', client.email, data_ctx)
