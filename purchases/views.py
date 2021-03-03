@@ -11,8 +11,8 @@ from rest_framework.exceptions import ValidationError
 
 # From w
 from purchases.models import Purchase, IndividualPurchase, \
-    create_shipment, create_payment, create_individual_purchase, \
-    get_or_create_addr, Payment, Shipment, Coupon, purchase_history, \
+    create_individual_purchase, \
+    Payment, Shipment, Coupon, purchase_history, \
     purchase_recommendations    
 
 from ecommerceapp import time
@@ -27,6 +27,7 @@ from users.auth.utils import did_token_required, \
 
 from users.models import Client, get_or_create_client, \
     create_address
+from users.serializers import AddressSerializer
 
 from purchases.constants import PAYMENT_VENDOR_MP, \
     PURCHASE_STATUS_CANCELLED
@@ -278,3 +279,17 @@ def purchase_recommendations_view(request, email):
 
 
 
+
+def get_or_create_addr(addr):
+    if addr is None:
+        return None, ''
+
+    serializer = AddressSerializer(data=addr)
+    if not serializer.is_valid():
+        return None, '{}'.format(serializer.errors)
+    try:
+        addr = serializer.save()
+    except Exception as err:
+        return None, 'error creating Address:  [{}]'.format(err)
+
+    return addr, ''

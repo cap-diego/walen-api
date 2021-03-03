@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db import transaction
 
+
 class User(AbstractUser):
     email = models.EmailField(unique=True, blank=False, null=False)
 
@@ -85,3 +86,4 @@ def create_client(data):
         return None, 'error, {} already registered'.format(email)
     client = Client.objects.create(email=email)
     return client, ''
+
