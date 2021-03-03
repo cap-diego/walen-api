@@ -349,7 +349,7 @@ class Coupon(models.Model):
     valid_until = models.DateField()
 
     def __str__(self):
-        return '[{}] Cupon de {} de descuento'.format(self.id, self.discount_percent)
+        return 'Cupon de {} de descuento'.format(self.discount_percent)
 
     def save(self, *args, **kwargs):
         if not self.id:

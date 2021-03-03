@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email de notificacion de EcommerceApp</title>
+  </head>
+  <body>
+    <h5> Hola {{ client_firstname }} {{ client_lastname }} ! </h5>
+
+    <h5>Tu pedido actualmente esta <b> {{ status }} </b> </h5>
+    <h5>Dirección de envio: {{ address }} </b> </h5>
+    <a href="{{link}}">Seguí el estado de tu pedido desde acá</a>
+
+    <p>Muchas gracias por tu compra,<br />Equipo de EcommerceApp</p>
+  </body>
+</html>

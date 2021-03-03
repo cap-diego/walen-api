@@ -589,7 +589,7 @@ class PurchaseNotificationEmailTestCase(TestCase):
 
         self.assertEqual(len(mail.outbox), purchase.clients_target)
 
-        self.assertEqual(mail.outbox[0].subject, 'Tu Compra fue completada!')
+        self.assertEqual(mail.outbox[0].subject, 'Pago realizado')
 
 
     def test_purchase_completed_and_not_all_payments_captured_no_notifies_users(self):
@@ -621,7 +621,7 @@ class PurchaseNotificationEmailTestCase(TestCase):
 
         individual.shipment.set_status_dispatched()
 
-        subject = 'Purchase {} está en camino!'.format(purchase.id)
+        subject = 'Estado compra'
 
         subject_enviados = ''
         for i in range(len(mail.outbox)):
@@ -640,7 +640,7 @@ class PurchaseNotificationEmailTestCase(TestCase):
 
         individual.shipment.set_status_delivered()
 
-        subject = 'Purchase {} fue entregada! Que la disfrutes!'.format(purchase.id)
+        subject = 'Estado compra'
 
         subject_enviados = ''
         for i in range(len(mail.outbox)):

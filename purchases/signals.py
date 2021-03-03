@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 from purchases.payment_vendors import mercadopago
 from purchases.constants import PAYMENT_STATUS_CAPTURED
+from ecommerceapp.email import send_email_purchase
 
 def update_purchase_related_models_status(sender, **kwargs):
     purchase = kwargs['instance']
@@ -35,20 +36,8 @@ def check_if_notify_clients(purchase):
     no_capturadas = individuals.exclude(payment__status=PAYMENT_STATUS_CAPTURED)
     if not no_capturadas.exists():
         for individual in individuals.all():
-            send_email_client(individual.client, \
+            send_email_client_payment_captured(individual.client, individual, \
                     subject='Tu Compra fue completada!')
-
-def send_email_client(client, subject, message=''):
-    message_default = 'El equipo de ecommerceapp te agradece la compra'
-    sent = mail.send_mail(
-        subject, '{} \n{}'.format(message_default, message),
-        None, [client.email],
-        fail_silently=False,
-    )
-    if sent == 0:
-        logger.error('no fue posible enviar el mail a {}'.\
-            format(client.emal))
-
 
 def capture_payments_purchase(purchase):
     """
@@ -105,21 +94,44 @@ def shipment_status_notify_client(sender, **kwargs):
         individual = shipment.individual_purchase
         purchase = individual.purchase
         client = individual.client 
-        message = build_msg_shipment_dispatched(shipment)
-        send_email_client(client, \
-                subject='Purchase {} está en camino!'.format(purchase.id))
+        link = '{}{}'.format(settings.BASE_URL_PAGE_SHIPMENT_STATUS, shipment.id)
+        data_ctx = {
+            'client_firstname': client.first_name,
+            'client_lasttname': client.last_name,
+            'link': link,
+            'address': individual.shipment,
+            'status': 'En camino'
+        }
+        send_email_purchase('Estado compra', client.email, data_ctx)
         return
 
     if shipment.delivered:
         individual = shipment.individual_purchase
         purchase = individual.purchase
         client = individual.client 
-        send_email_client(client, \
-                subject='Purchase {} fue entregada! Que la disfrutes!'.format(purchase.id))
+        link = '{}{}'.format(settings.BASE_URL_PAGE_SHIPMENT_STATUS, shipment.id)
+        data_ctx = {
+            'client_firstname': client.first_name,
+            'client_lasttname': client.last_name,
+            'link': link,
+            'address': individual.shipment,
+            'status': 'Entregado'
+        }
+        send_email_purchase('Estado compra', client.email, data_ctx)
         return
 
-def build_msg_shipment_dispatched(shipment):
-    url_envio = '{}{}'.format(settings.BASE_URL_PAGE_SHIPMENT_STATUS, shipment.id)
-    msg1 =  'Podes seguir el envio desde: {}'.format(url_envio)
-    msg2 = 'Direccion envio: '.format(shipment.human_readable_address)
-    return '{} \n{}'.format(msg1, msg2)
+
+def send_email_client_payment_captured(client, individual, subject, message=''):
+    shipment = individual.shipment
+    link = '{}{}'.format(settings.BASE_URL_PAGE_SHIPMENT_STATUS, shipment.id)
+    data_ctx = {
+        'client_firstname': client.first_name,
+        'client_lasttname': client.last_name,
+        'link': link,
+        'address': individual.shipment,
+        'status': 'Preparandose'
+    }    
+    sent = send_email_purchase('Pago realizado', client.email, data_ctx)
+    if sent == 0:
+        logger.error('no fue posible enviar el mail a {}'.\
+            format(client.emal))
