@@ -12,12 +12,17 @@ from rest_framework.exceptions import ValidationError
 # From w
 from purchases.models import Purchase, IndividualPurchase, \
     create_shipment, create_payment, create_individual_purchase, \
-        get_or_create_addr, Payment, Shipment, Coupon
+        get_or_create_addr, Payment, Shipment, Coupon, purchase_history
+
 from ecommerceapp import time
 from purchases.serializers import PurchaseGETSerializer, \
     PurchasePOSTSerializer, IndividualPurchasePOSTSerializer, \
-        IndividualPurchaseGETSerializer, PaymentSerializer, \
-        ShipmentSerializer, PaymentPUTSerializer, CouponSerializer
+    IndividualPurchaseGETSerializer, PaymentSerializer, \
+    ShipmentSerializer, PaymentPUTSerializer, CouponSerializer, \
+    IndividualPurchaseMiniGETSerializer    
+
+from users.auth.utils import did_token_required, \
+    email_in_url_required
 
 from users.models import Client, get_or_create_client, \
     create_address
@@ -26,6 +31,7 @@ from purchases.constants import PAYMENT_VENDOR_MP, \
     PURCHASE_STATUS_CANCELLED
 from purchases.payment_vendors import mercadopago
 from carts.models import CartProduct
+
 
 PurchasesNoCancelled = \
     Purchase.objects.exclude(status=PURCHASE_STATUS_CANCELLED)
@@ -239,6 +245,22 @@ def coupons_list_view(request):
     coupons = Coupon.objects.filter(valid_until__gte=now)
     serializer = CouponSerializer(coupons, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([])
+@email_in_url_required
+def purchase_history_view(request, email):
+    """
+        Get the last 10 purchases
+    """
+    client = get_object_or_404(Client, email=email)
+
+    individuals = purchase_history(client, 10)
+
+    serializer = IndividualPurchaseMiniGETSerializer(individuals, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 
     
 

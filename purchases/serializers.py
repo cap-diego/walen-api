@@ -73,6 +73,20 @@ class IndividualPurchaseGETSerializer(serializers.ModelSerializer):
         model = IndividualPurchase
         fields = '__all__'
 
+class IndividualPurchaseMiniGETSerializer(serializers.ModelSerializer):
+    shipment_status = serializers.SerializerMethodField(method_name='get_shipment_status')
+    payment_amount = serializers.SerializerMethodField(method_name='get_payment_amount')
+    class Meta:
+        model = IndividualPurchase
+        fields = ['id', 'shipment_status', 'creation_date', 'payment_amount']
+
+    def get_shipment_status(self,  obj):
+        return obj.shipment.get_status_display()
+
+    def get_payment_amount(self, obj):
+        return obj.payment.amount_to_pay
+    
+
 class PaymentPUTSerializer(serializers.Serializer):
     payment_method_id = serializers.CharField()
     token = serializers.CharField()

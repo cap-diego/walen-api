@@ -6,7 +6,7 @@ from purchases.views import create_purchase_view, \
     get_purchase_view, create_individual_purchase_view, \
     list_individual_purchase_view, detail_payment_view, \
     detail_shipment_view, create_payment_view, cancel_puchase_view, \
-    payment_add_coupon_view, coupons_list_view
+    payment_add_coupon_view, coupons_list_view, purchase_history_view
 
 urlpatterns = [
     path('',  create_purchase_view, name='purchase-list'),
@@ -46,4 +46,6 @@ urlpatterns = [
         coupons_list_view,
         name='coupon-list'),
         
+    path('<str:email>/history', purchase_history_view,
+        name='cliente-purchases-history'),
 ]

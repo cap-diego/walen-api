@@ -368,3 +368,11 @@ class Coupon(models.Model):
 
 def generate_random(n):
     return ''.join(random.sample(string.ascii_uppercase, n))
+
+def purchase_history(client, last=10):
+    qs = IndividualPurchase.objects.filter(
+        client=client
+    )
+    return qs[:last]
+
+# Index para categorias de productos
