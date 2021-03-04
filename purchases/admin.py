@@ -24,7 +24,7 @@ admin.site.register(Shipment, ShipmentAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.disable_action('delete_selected')
 
-admin.site.site_header = "EcommerceApp módulo de administración"
-admin.site.site_title = "EcommerceApp administración"
+admin.site.site_header = "módulo de administración de walen"
+admin.site.site_title = "Administración de walen"
 admin.site.index_title = "Bienvenido"
 site_header = 'Ingresá al módulo de administración'
