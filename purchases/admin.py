@@ -13,9 +13,11 @@ def set_dispatched(modeladmin, request, queryset):
     queryset.update(status=SHIPMENT_STATUS_DISPATCHED)
 set_dispatched.short_description = 'Actualizar como en camino'
 
-
 class ShipmentAdmin(admin.ModelAdmin):
     actions = [set_delivered, set_dispatched]
+    list_filter = ('status',)
+    ordering = ('individual_purchase__creation_date',)
+
 
 class CouponAdmin(admin.ModelAdmin):
     pass
