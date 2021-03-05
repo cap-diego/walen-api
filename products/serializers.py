@@ -56,5 +56,5 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductRecommendedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['featured_photo_url', 'display_name', 'description', 'unitary_price', 'measure_unit']
+        fields = ['id', 'featured_photo_url', 'display_name', 'description', 'unitary_price', 'measure_unit']
 
