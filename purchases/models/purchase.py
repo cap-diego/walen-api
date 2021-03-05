@@ -122,6 +122,10 @@ class Purchase(models.Model):
     def amount(self):
         return self.cart_price - self.discount_amount
 
+    @property
+    def is_waiting_init_payment(self):
+        return self.status == PURCHASE_STATUS_PEND_INIT_PAY
+
 
 def purchase_recommendations(client):
     """

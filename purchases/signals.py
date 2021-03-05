@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 from purchases.payment_vendors import mercadopago
 from purchases.constants import PAYMENT_STATUS_CAPTURED
-from ecommerceapp.email import send_email_purchase
+from ecommerceapp.email import send_email_purchase, send_email_new_purchase
 
 def update_purchase_related_models_status(sender, **kwargs):
     purchase = kwargs['instance']
@@ -23,6 +23,10 @@ def update_purchase_related_models_status(sender, **kwargs):
 
     if purchase.clients_target_reached:
         purchase.set_status_completed()
+        return
+
+    if purchase.is_waiting_init_payment:
+        send_email_client_new_group_purchase(purchase)
         return
 
 
@@ -165,3 +169,20 @@ def send_email_client_payment_cancelled(client, individual, subject, message='')
     if sent == 0:
         logger.error('no fue posible enviar el mail a {}'.\
             format(client.emal))
+
+def send_email_client_new_group_purchase(purchase):
+    try:
+        client = purchase.individuals_purchases[0].client
+    except Exception:
+        return
+    link = '{}{}'.format(settings.BASE_URL_PAGE_PURCHASE_SHARE, purchase.id)
+    data_ctx = {
+        'client_firstname': client.first_name,
+        'client_lasttname': client.last_name,
+        'link': link,
+    }    
+    sent = send_email_new_purchase(client.email, data_ctx)
+    if sent == 0:
+        logger.error('no fue posible enviar el mail a {}'.\
+            format(client.emal))
+

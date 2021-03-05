@@ -14,3 +14,15 @@ def send_email_purchase(subject, email_to, data_ctx):
     )
     msg.content_subtype = "html" 
     return msg.send()
+
+def send_email_new_purchase(email_to, data_ctx):
+    ctx = data_ctx
+    message = get_template('email_new_group_purchase.template.html').render(ctx)
+    msg = EmailMessage(
+        'Nueva compra colaborativa',
+        message,
+        None,
+        [email_to],
+    )
+    msg.content_subtype = "html" 
+    return msg.send()
