@@ -141,7 +141,7 @@ def send_email_client_payment_captured(client, individual, subject, message=''):
         'client_firstname': client.first_name,
         'client_lasttname': client.last_name,
         'link': link,
-        'address': individual.shipment,
+        'address': individual.shipment.human_readable_address,
         'status': 'Preparandose'
     }    
     sent = send_email_purchase('Pago realizado', client.email, data_ctx)
@@ -158,7 +158,7 @@ def send_email_client_payment_cancelled(client, individual, subject, message='')
         'client_firstname': client.first_name,
         'client_lasttname': client.last_name,
         'link': link,
-        'address': individual.shipment,
+        'address': individual.shipment.human_readable_address,
         'status': 'Cancelado'
     }    
     sent = send_email_purchase(subject, client.email, data_ctx)
