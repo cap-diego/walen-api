@@ -261,7 +261,7 @@ class IndividualPurchaseAPITest(TestCase):
         purchase.refresh_from_db()
         assert purchase.clients_left == 2
 
-    def test_client_cant_have_multiple_individuals_to_same_purchase(self):
+    def test_client_cant_have_multiple_individuals_with_reserved_payment_to_same_purchase(self):
         c = Client()
         addr = G(Address)
         cart = G(Cart)
@@ -270,6 +270,8 @@ class IndividualPurchaseAPITest(TestCase):
                 args=[purchase.id])
         response = c.post(url, json.dumps(self.body_ok()), content_type='application/json')
         assert response.status_code == 201
+        
+        purchase.individuals_purchases.all()[0].payment.set_status_reserved()
 
         response = c.post(url, json.dumps(self.body_ok()), content_type='application/json')
         assert response.status_code == 400

@@ -11,7 +11,7 @@ from rest_framework.exceptions import ValidationError
 
 # From w
 from purchases.models import Purchase, IndividualPurchase, \
-    create_individual_purchase, \
+    get_create_individual_purchase, \
     Payment, Shipment, Coupon, purchase_history, \
     purchase_recommendations    
 
@@ -134,7 +134,7 @@ def create_individual_purchase_view(request, purchase_id):
     if err:
         return Response('error al crear address: {}'.format(err), status=status.HTTP_400_BAD_REQUEST)        
 
-    individual, err = create_individual_purchase(purchase, client, addr)
+    individual, err = get_create_individual_purchase(purchase, client, addr)
         
     if err:
         return Response('error al crear individual: {}'.format(err), status=status.HTTP_400_BAD_REQUEST)
