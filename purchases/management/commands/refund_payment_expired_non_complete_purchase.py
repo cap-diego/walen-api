@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 # From w
 from purchases.models import Payment
-from purchases.constants import PURCHASE_STATUS_CANCELLED,  \
+from purchases.constants import PURCHASE_STATUS_COMPLETED,  \
     PAYMENT_STATUS_RESERVED    
 from purchases.signals import cancel_payment 
 from ecommerceapp.time import APIClock
@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         now = APIClock.now()
         payments_reserved_purchase_non_cancelled = Payment.objects.exclude(
-            individual_purchase__purchase__status=PURCHASE_STATUS_CANCELLED
+            individual_purchase__purchase__status=PURCHASE_STATUS_COMPLETED
         ).filter(
             status=PAYMENT_STATUS_RESERVED
         )
